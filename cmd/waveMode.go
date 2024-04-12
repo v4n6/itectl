@@ -40,23 +40,8 @@ var waveModeCmd = &cobra.Command{
 
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		speed, err := config.Config.SpeedVal()
-		if err != nil {
-			return err
-		}
-
-		brightness, err := config.Config.BrightnessVal()
-		if err != nil {
-			return err
-		}
-
-		direction, err := config.Config.DirectionVal()
-		if err != nil {
-			return err
-		}
-
 		return executeCommand(func(dev *libusb.Device, h *libusb.DeviceHandle) error {
-			return ite8291.SetWaveMode(h, speed, brightness, direction, config.Config.SaveVal())
+			return ite8291.SetWaveMode(h, config.Speed(), config.Brightness(), config.Direction(), config.Save())
 		})
 	},
 }
@@ -66,7 +51,7 @@ func init() {
 
 	config.AddSpeedFlag(waveModeCmd)
 	config.AddBrightnessFlag(waveModeCmd)
-	config.AddDirectionNameFlag(waveModeCmd)
+	config.AddDirectionFlag(waveModeCmd)
 
 	config.AddSaveFlag(waveModeCmd)
 }

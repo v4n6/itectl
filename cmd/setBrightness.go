@@ -36,13 +36,8 @@ var setBrightnessCmd = &cobra.Command{
   Brightness of the mode must be specified by --brightness (-b) option.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		brightness, err := config.Config.BrightnessVal()
-		if err != nil {
-			return err
-		}
-
 		return executeCommand(func(dev *libusb.Device, h *libusb.DeviceHandle) error {
-			return ite8291.SetBrightness(h, brightness)
+			return ite8291.SetBrightness(h, config.Brightness())
 		})
 	},
 }

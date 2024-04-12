@@ -38,13 +38,9 @@ var setColorCmd = &cobra.Command{
 
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		colorNum, err := config.Config.AssignableColorNumVal()
-		if err != nil {
-			return err
-		}
-
 		return executeCommand(func(dev *libusb.Device, h *libusb.DeviceHandle) error {
-			return ite8291.SetColor(h, colorNum, config.Config.ColorRedVal(), config.Config.ColorGreenVal(), config.Config.ColorBlueVal())
+			return ite8291.SetColor(h, config.AssignableColorNum(),
+				config.ColorRed(), config.ColorGreen(), config.ColorBlue())
 		})
 	},
 }

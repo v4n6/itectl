@@ -5,61 +5,76 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 const (
+	pollDefault = false
+
 	pollIntervalDefault = 200 * time.Millisecond
-	pollTimeoutDefault  = time.Second
+
+	pollTimeoutDefault = time.Second
 )
 
-type PollProp struct {
-	Poll         bool
-	PollInterval time.Duration
-	PollTimeout  time.Duration
+const (
+	pollProp = "poll.always"
+
+	pollIntervalProp = "poll.interval"
+
+	pollTimeoutProp = "poll.timeout"
+)
+
+const (
+	pollFlag = "poll"
+
+	pollIntervalFlag = "poll-interval"
+
+	pollTimeoutFlag = "poll-timeout"
+)
+
+func Poll() bool {
+	return viper.GetBool(pollProp)
 }
 
-func (c *PollProp) PollVal() (bool, error) {
-	return c.Poll, nil
+func PollInterval() time.Duration {
+	return viper.GetDuration(pollIntervalProp)
 }
 
-func (c *PollProp) validate() error {
-
-	if c.PollInterval >= c.PollTimeout {
-		return fmt.Errorf("%w %q; expected poll-interval '%s' to be less than poll-timeout '%s' ",
-			InvalidOptionValueError, "poll-interval", c.PollInterval, c.PollTimeout)
-	}
-
-	return nil
+func PollTimeout() time.Duration {
+	return viper.GetDuration(pollTimeoutProp)
 }
 
-func (c *PollProp) PollIntervalVal() (time.Duration, error) {
+func AddPollFlags(cmd *cobra.Command) {
 
-	err := c.validate()
-	if err != nil {
-		return 0, err
-	}
+	cmd.PersistentFlags().Bool(pollFlag, pollDefault, "Instructs application to poll presence of the controller before executing command")
+	cmd.PersistentFlags().Duration(pollIntervalFlag, pollIntervalDefault, "Time interval to wait between controller polls.")
+	cmd.PersistentFlags().Duration(pollTimeoutFlag, pollTimeoutDefault, "Maximum time to wait for controller.")
 
-	return c.PollInterval, nil
-}
+	bindAndValidate(cmd, pollFlag, pollProp, func() error {
 
-func (c *PollProp) PollTimeoutVal() (time.Duration, error) {
+		err := viper.BindPFlag(pollProp, cmd.Flag(pollFlag))
+		if err != nil {
+			return err
+		}
 
-	err := c.validate()
-	if err != nil {
-		return 0, err
-	}
+		err = viper.BindPFlag(pollIntervalProp, cmd.Flag(pollIntervalFlag))
+		if err != nil {
+			return err
+		}
 
-	return c.PollTimeout, nil
-}
+		err = viper.BindPFlag(pollTimeoutProp, cmd.Flag(pollTimeoutFlag))
+		if err != nil {
+			return err
+		}
 
-func AddPollFlag(cmd *cobra.Command) {
-	cmd.PersistentFlags().BoolVarP(&Config.Poll, "poll", "p", false, "Instructs application to poll presence of the controller before executing command")
-}
+		if Poll() {
+			i, t := PollInterval(), PollTimeout()
+			if i >= t {
+				return fmt.Errorf("%w %q; expected poll-interval '%s' to be less than poll-timeout '%s' ",
+					InvalidOptionValueError, "poll-interval", i, t)
+			}
+		}
 
-func AddPollIntervalFlag(cmd *cobra.Command) {
-	cmd.PersistentFlags().DurationVar(&Config.PollInterval, "poll-interval", pollIntervalDefault, "Time interval to wait between controller polls.")
-}
-
-func AddPollTimeoutFlag(cmd *cobra.Command) {
-	cmd.PersistentFlags().DurationVar(&Config.PollTimeout, "poll-timeout", pollTimeoutDefault, "Maximum time to wait for controller.")
+		return nil
+	})
 }

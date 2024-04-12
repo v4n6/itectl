@@ -4,26 +4,27 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	ite8291 "github.com/v4n6/ite8291r3tool/pkg"
 )
 
 const brightnessDefault = 25
 
-type BrightnessProp struct {
-	Brightness uint8
+const brightnessProp = "brightness"
+
+// Brightness returns either specified, configured or default value of the brightness flag.
+func Brightness() uint8 {
+	return byte(viper.GetUint(brightnessProp))
 }
 
-func (c *BrightnessProp) BrightnessVal() (uint8, error) {
-	err := validateMaxUint8Value("brightness", c.Brightness, ite8291.BrightnessMaxValue)
-	if err != nil {
-		return 0, err
-	}
-
-	return c.Brightness, nil
-}
-
-// addBrightnessFlag add brightness flag the provided cmd
+// AddBrightnessFlag adds brightness flag to the provided cmd and binds it to the corresponding viper config property.
+// It also adds hook to validate brightness value.
 func AddBrightnessFlag(cmd *cobra.Command) {
-	cmd.PersistentFlags().Uint8VarP(&Config.Brightness, "brightness", "b", brightnessDefault,
+
+	cmd.PersistentFlags().Uint8P(brightnessProp, "b", brightnessDefault,
 		fmt.Sprintf("Brightness of the keyboard backlight [0-%d]", ite8291.BrightnessMaxValue))
+
+	bindAndValidate(cmd, brightnessProp, brightnessProp, func() error {
+		return validateMaxUint8Value(brightnessProp, Brightness(), ite8291.BrightnessMaxValue)
+	})
 }

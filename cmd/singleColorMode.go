@@ -38,14 +38,9 @@ var singleColorModeCmd = &cobra.Command{
   If --save is provided the corresponding colors are saved in controller.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		brightness, err := config.Config.BrightnessVal()
-		if err != nil {
-			return err
-		}
-
 		return executeCommand(func(dev *libusb.Device, h *libusb.DeviceHandle) error {
-			return ite8291.SetSingleColorMode(dev, h, brightness,
-				config.Config.ColorRedVal(), config.Config.ColorGreenVal(), config.Config.ColorBlueVal(), config.Config.SaveVal())
+			return ite8291.SetSingleColorMode(dev, h, config.Brightness(),
+				config.ColorRed(), config.ColorGreen(), config.ColorBlue(), config.Save())
 		})
 	},
 }

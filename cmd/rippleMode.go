@@ -42,23 +42,9 @@ var rippleModeCmd = &cobra.Command{
 
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		speed, err := config.Config.SpeedVal()
-		if err != nil {
-			return err
-		}
-
-		brightness, err := config.Config.BrightnessVal()
-		if err != nil {
-			return err
-		}
-
-		colorNum, err := config.Config.ColorNumVal()
-		if err != nil {
-			return err
-		}
-
 		return executeCommand(func(dev *libusb.Device, h *libusb.DeviceHandle) error {
-			return ite8291.SetRippleMode(h, speed, brightness, colorNum, config.Config.ReactiveVal(), config.Config.SaveVal())
+			return ite8291.SetRippleMode(h, config.Speed(), config.Brightness(), config.ColorNum(),
+				config.Reactive(), config.Save())
 		})
 	},
 }

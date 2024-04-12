@@ -38,13 +38,8 @@ var rainbowModeCmd = &cobra.Command{
 
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		brightness, err := config.Config.BrightnessVal()
-		if err != nil {
-			return err
-		}
-
 		return executeCommand(func(dev *libusb.Device, h *libusb.DeviceHandle) error {
-			return ite8291.SetRainbowMode(h, brightness, config.Config.SaveVal())
+			return ite8291.SetRainbowMode(h, config.Brightness(), config.Save())
 		})
 	},
 }

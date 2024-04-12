@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/adrg/xdg"
 	"github.com/gotmc/libusb/v2"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -32,18 +33,17 @@ import (
 	ite8291 "github.com/v4n6/ite8291r3tool/pkg"
 )
 
+const configName = "ite8291r3tool"
+
+const configType = "yaml"
+
 var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "ite8291r3tool",
 	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Long:  `ROOOT1`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
@@ -61,19 +61,13 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
+	cobra.EnableTraverseRunHooks = true
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.ite8291r3tool.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "Configuration file to use instead of xdg config files.")
 
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
-	config.AddPollFlag(rootCmd)
-	config.AddPollIntervalFlag(rootCmd)
-	config.AddPollTimeoutFlag(rootCmd)
+	config.AddPollFlags(rootCmd)
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -82,21 +76,34 @@ func initConfig() {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Find home directory.
-		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
 
-		// Search config in home directory with name ".ite8291r3tool" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigType("yaml")
-		viper.SetConfigName(".ite8291r3tool")
+		for _, dir := range xdg.ConfigDirs {
+			mergeConfig(dir)
+		}
+		mergeConfig(xdg.ConfigHome)
 	}
 
 	viper.AutomaticEnv() // read in environment variables that match
+}
 
-	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+// mergeConfig ...
+func mergeConfig(dir string) {
+	v := viper.New()
+	v.SetConfigName(configName)
+	v.SetConfigType(configType)
+
+	v.AddConfigPath(dir)
+	err := v.ReadInConfig()
+	if err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			fmt.Fprintf(os.Stderr, "Error reading configuration: %v\n", err)
+		}
+	}
+
+	err = viper.GetViper().MergeConfigMap(v.AllSettings())
+	if err != nil {
+		// should never happen
+		fmt.Fprintf(os.Stderr, "%v\n", err)
 	}
 }
 
@@ -104,24 +111,9 @@ type ite8291Command func(dev *libusb.Device, h *libusb.DeviceHandle) error
 
 func findDevice() (*libusb.Device, *libusb.DeviceHandle, func(), error) {
 
-	poll, err := config.Config.PollVal()
-	if err != nil {
-		return nil, nil, nil, err
-	}
+	if config.Poll() {
 
-	pollInterval, err := config.Config.PollIntervalVal()
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	pollTimeout, err := config.Config.PollTimeoutVal()
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	if poll {
-
-		return ite8291.GetDeviceWithPolling(pollInterval, pollTimeout)
+		return ite8291.GetDeviceWithPolling(config.PollInterval(), config.PollTimeout())
 	}
 
 	return ite8291.GetDevice()

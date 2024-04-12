@@ -41,28 +41,15 @@ var auroraModeCmd = &cobra.Command{
   If --save is provided the mode is saved in controller.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		speed, err := config.Config.SpeedVal()
-		if err != nil {
-			return err
-		}
-
-		brightness, err := config.Config.BrightnessVal()
-		if err != nil {
-			return err
-		}
-
-		colorNum, err := config.Config.ColorNumVal()
-		if err != nil {
-			return err
-		}
-
 		return executeCommand(func(dev *libusb.Device, h *libusb.DeviceHandle) error {
-			return ite8291.SetAuroraMode(h, speed, brightness, colorNum, config.Config.ReactiveVal(), config.Config.SaveVal())
+			return ite8291.SetAuroraMode(h, config.Speed(), config.Brightness(), config.ColorNum(),
+				config.Reactive(), config.Save())
 		})
 	},
 }
 
 func init() {
+
 	rootCmd.AddCommand(auroraModeCmd)
 
 	config.AddSpeedFlag(auroraModeCmd)

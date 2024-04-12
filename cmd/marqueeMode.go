@@ -39,18 +39,8 @@ var marqueeModeCmd = &cobra.Command{
 
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		speed, err := config.Config.SpeedVal()
-		if err != nil {
-			return err
-		}
-
-		brightness, err := config.Config.BrightnessVal()
-		if err != nil {
-			return err
-		}
-
 		return executeCommand(func(dev *libusb.Device, h *libusb.DeviceHandle) error {
-			return ite8291.SetMarqueeMode(h, speed, brightness, config.Config.SaveVal())
+			return ite8291.SetMarqueeMode(h, config.Speed(), config.Brightness(), config.Save())
 		})
 	},
 }
