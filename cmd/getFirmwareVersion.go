@@ -22,24 +22,32 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"github.com/gotmc/libusb/v2"
+	"fmt"
+
 	"github.com/spf13/cobra"
-	"github.com/v4n6/ite8291r3tool/pkg"
+	"github.com/spf13/viper"
+	"github.com/v4n6/ite8291r3tool/pkg/ite8291"
 )
 
-// setOffCmd represents the set-off command
-var setOffCmd = &cobra.Command{
-	Use:   "set-off",
-	Short: "Turn the keyboard backlight off.",
-	Long:  `Turn the keyboard backlight off.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
+// newGetFirmwareVersionCmd creates, initializes and returns command
+// to get and print keyboard backlight controller firmware version.
+func newGetFirmwareVersionCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
 
-		return executeCommand(func(_ *libusb.Device, h *libusb.DeviceHandle) error {
-			return ite8291.SetOff(h)
-		})
-	},
-}
+	// getFirmwareVersionCmd represents the get-firmware-version command
+	return &cobra.Command{
+		Use:   "get-firmware-version",
+		Short: "Get firmware version of the keyboard backlight.",
+		Long:  `Print firmware version of the keyboard backlight.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return call(func(ctl *ite8291.Controller) error {
+				ver, err := ctl.GetFirmwareVersion()
+				if err != nil {
+					return err
+				}
 
-func init() {
-	rootCmd.AddCommand(setOffCmd)
+				fmt.Fprintln(cmd.OutOrStdout(), ver)
+				return nil
+			})
+		},
+	}
 }

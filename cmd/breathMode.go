@@ -22,37 +22,41 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"github.com/gotmc/libusb/v2"
 	"github.com/spf13/cobra"
-	"github.com/v4n6/ite8291r3tool/config"
-	ite8291 "github.com/v4n6/ite8291r3tool/pkg"
+	"github.com/spf13/viper"
+	"github.com/v4n6/ite8291r3tool/params"
+	"github.com/v4n6/ite8291r3tool/pkg/ite8291"
 )
 
-// setBreathingModeCmd represents the breath-mode command
-var breathModeCmd = &cobra.Command{
-	Use:   "breath-mode",
-	Short: "Set keyboard backlight to 'breathing' mode.",
-	Long: `Set keyboard backlight to 'breathing' mode.
+// newBreathModeCmd creates, initializes and returns command
+// to set keyboard backlight to breathing mode.
+func newBreathModeCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
+
+	var speed func() byte
+	var brightness func() byte
+	var colorNum func() byte
+	var save func() bool
+
+	var breathModeCmd = &cobra.Command{
+		Use:   "breath-mode",
+		Short: "Set keyboard backlight to 'breathing' mode.",
+		Long: `Set keyboard backlight to 'breathing' mode.
   Brightness of the mode can be provided by --brightness (-b) option.
   Speed of the mode's animation can be provided by --speed (-s) option.
   The predefined color used by the mode can be specified by its number provided by --color-num options.
   Color number '0' indicates black (none) color. Color number '8' indicates random color.
   If --save is provided the mode is saved in controller.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return call(func(ctl *ite8291.Controller) error {
+				return ctl.SetBreathingMode(speed(), brightness(), colorNum(), save())
+			})
+		},
+	}
 
-		return executeCommand(func(dev *libusb.Device, h *libusb.DeviceHandle) error {
-			return ite8291.SetBreathingMode(h, config.Speed(), config.Brightness(), config.ColorNum(),
-				config.Save())
-		})
-	},
-}
+	speed = params.AddSpeed(breathModeCmd, v)
+	brightness = params.AddBrightness(breathModeCmd, v)
+	colorNum = params.AddColorNum(breathModeCmd, v)
+	save = params.AddSave(breathModeCmd, v)
 
-func init() {
-	rootCmd.AddCommand(breathModeCmd)
-
-	config.AddSpeedFlag(breathModeCmd)
-	config.AddBrightnessFlag(breathModeCmd)
-	config.AddColorNumFlag(breathModeCmd)
-
-	config.AddSaveFlag(breathModeCmd)
+	return breathModeCmd
 }

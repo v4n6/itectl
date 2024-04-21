@@ -22,44 +22,24 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/v4n6/ite8291r3tool/pkg/ite8291"
 )
 
-const (
-	isOnMessage  = "On"
-	isOffMessage = "Off"
-)
+// newOffModeCmd creates, initializes and returns command
+// to set keyboard backlight off.
+func newOffModeCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
 
-// newStateCmd creates, initializes and returns command
-// to get and print keyboard backlight state.
-func newStateCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
-
-	// stateCmd represents the state command
-	var stateCmd = &cobra.Command{
-		Use:   "state",
-		Short: "Get the current state of the keyboard backlight.",
-		Long:  `Print state of the keyboard backlight as either 'on' or 'off'.`,
+	// offModeCmd represents the set-off command
+	return &cobra.Command{
+		Use:   "off-mode",
+		Short: "Turn the keyboard backlight off.",
+		Long:  `Turn the keyboard backlight off.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return call(func(ctl *ite8291.Controller) error {
-				isOn, err := ctl.State()
-				if err != nil {
-					return err
-				}
-
-				if isOn {
-					fmt.Fprintln(cmd.OutOrStdout(), isOnMessage)
-				} else {
-					fmt.Fprintln(cmd.OutOrStdout(), isOffMessage)
-				}
-
-				return nil
+				return ctl.SetOffMode()
 			})
 		},
 	}
-
-	return stateCmd
 }

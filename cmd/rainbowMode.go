@@ -22,32 +22,36 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"github.com/gotmc/libusb/v2"
 	"github.com/spf13/cobra"
-	"github.com/v4n6/ite8291r3tool/config"
-	ite8291 "github.com/v4n6/ite8291r3tool/pkg"
+	"github.com/spf13/viper"
+	"github.com/v4n6/ite8291r3tool/params"
+	"github.com/v4n6/ite8291r3tool/pkg/ite8291"
 )
 
-// rainbowModeCmd represents the rainbow-mode command
-var rainbowModeCmd = &cobra.Command{
-	Use:   "rainbow-mode",
-	Short: "Set keyboard backlight to 'rainbow' mode.",
-	Long: `Set keyboard backlight to 'rainbow' mode.
+// newRainbowModeCmd creates, initializes and returns command
+// to set keyboard backlight to rainbow mode.
+func newRainbowModeCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
+
+	var brightness func() byte
+	var save func() bool
+
+	// rainbowModeCmd represents the rainbow-mode command
+	var rainbowModeCmd = &cobra.Command{
+		Use:   "rainbow-mode",
+		Short: "Set keyboard backlight to 'rainbow' mode.",
+		Long: `Set keyboard backlight to 'rainbow' mode.
   Brightness of the mode can be provided by --brightness (-b) option.
   If --save is provided the mode is saved in controller.`,
 
-	RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return call(func(ctl *ite8291.Controller) error {
+				return ctl.SetRainbowMode(brightness(), save())
+			})
+		},
+	}
 
-		return executeCommand(func(dev *libusb.Device, h *libusb.DeviceHandle) error {
-			return ite8291.SetRainbowMode(h, config.Brightness(), config.Save())
-		})
-	},
-}
+	brightness = params.AddBrightness(rainbowModeCmd, v)
+	save = params.AddSave(rainbowModeCmd, v)
 
-func init() {
-	rootCmd.AddCommand(rainbowModeCmd)
-
-	config.AddBrightnessFlag(rainbowModeCmd)
-
-	config.AddSaveFlag(rainbowModeCmd)
+	return rainbowModeCmd
 }

@@ -22,29 +22,32 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"github.com/gotmc/libusb/v2"
 	"github.com/spf13/cobra"
-	"github.com/v4n6/ite8291r3tool/config"
-	ite8291 "github.com/v4n6/ite8291r3tool/pkg"
+	"github.com/spf13/viper"
+	"github.com/v4n6/ite8291r3tool/params"
+	"github.com/v4n6/ite8291r3tool/pkg/ite8291"
 )
 
-// setBrightnessCmd represents the set-brightness command
-var setBrightnessCmd = &cobra.Command{
-	Use:   "set-brightness",
-	Short: "Change keyboard backlight brightness.",
-	Long: `Set brightness of the keyboard backlight to the provided value
+// newSetBrightnessCmd creates, initializes and returns command
+// to set keyboard backlight brightness.
+func newSetBrightnessCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
+
+	var brightness func() byte
+
+	var setBrightnessCmd = &cobra.Command{
+		Use:   "set-brightness",
+		Short: "Change keyboard backlight brightness.",
+		Long: `Set brightness of the keyboard backlight to the provided value
   Brightness of the mode must be specified by --brightness (-b) option.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return call(func(ctl *ite8291.Controller) error {
+				return ctl.SetBrightness(brightness())
+			})
+		},
+	}
 
-		return executeCommand(func(dev *libusb.Device, h *libusb.DeviceHandle) error {
-			return ite8291.SetBrightness(h, config.Brightness())
-		})
-	},
-}
-
-func init() {
-	rootCmd.AddCommand(setBrightnessCmd)
-
-	config.AddBrightnessFlag(setBrightnessCmd)
+	brightness = params.AddBrightness(setBrightnessCmd, v)
 	_ = setBrightnessCmd.MarkPersistentFlagRequired("brightness")
+
+	return setBrightnessCmd
 }

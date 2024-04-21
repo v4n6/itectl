@@ -24,31 +24,31 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/gotmc/libusb/v2"
 	"github.com/spf13/cobra"
-	ite8291 "github.com/v4n6/ite8291r3tool/pkg"
+	"github.com/spf13/viper"
+	"github.com/v4n6/ite8291r3tool/pkg/ite8291"
 )
 
-// getBrightnessCmd represents the get-brightness command
-var getBrightnessCmd = &cobra.Command{
-	Use:   "get-brightness",
-	Short: "Get current brightness of the keyboard backlight.",
-	Long:  `Print current brightness of the keyboard backlight.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
+// newGetBrightnessCmd creates, initializes and returns command
+// to get and print keyboard backlight brightness.
+func newGetBrightnessCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
 
-		return executeCommand(func(dev *libusb.Device, h *libusb.DeviceHandle) error {
+	// getBrightnessCmd represents the get-brightness command
+	return &cobra.Command{
+		Use:   "get-brightness",
+		Short: "Get current brightness of the keyboard backlight.",
+		Long:  `Print current brightness of the keyboard backlight.`,
+		RunE: func(cmd *cobra.Command, args []string) error {
 
-			brightness, err := ite8291.GetBrightness(h)
-			if err != nil {
-				return err
-			}
+			return call(func(ctl *ite8291.Controller) error {
+				brightness, err := ctl.GetBrightness()
+				if err != nil {
+					return err
+				}
 
-			fmt.Printf("%d", brightness)
-			return nil
-		})
-	},
-}
-
-func init() {
-	rootCmd.AddCommand(getBrightnessCmd)
+				fmt.Fprintf(cmd.OutOrStdout(), "%d\n", brightness)
+				return nil
+			})
+		},
+	}
 }

@@ -22,34 +22,40 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"github.com/gotmc/libusb/v2"
 	"github.com/spf13/cobra"
-	"github.com/v4n6/ite8291r3tool/config"
-	ite8291 "github.com/v4n6/ite8291r3tool/pkg"
+	"github.com/spf13/viper"
+	"github.com/v4n6/ite8291r3tool/params"
+	"github.com/v4n6/ite8291r3tool/pkg/ite8291"
 )
 
-// marqueeModeCmd represents the marquee-mode command
-var marqueeModeCmd = &cobra.Command{
-	Use:   "marquee-mode",
-	Short: "Set keyboard backlight to 'marquee' mode.",
-	Long: `Set keyboard backlight to 'marquee' mode.
+// newMarqueeModeCmd creates, initializes and returns command
+// to set keyboard backlight to marquee mode.
+func newMarqueeModeCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
+
+	var brightness func() byte
+	var speed func() byte
+	var save func() bool
+
+	// marqueeModeCmd represents the marquee-mode command
+	var marqueeModeCmd = &cobra.Command{
+		Use:   "marquee-mode",
+		Short: "Set keyboard backlight to 'marquee' mode.",
+		Long: `Set keyboard backlight to 'marquee' mode.
 	Brightness of the mode can be provided by --brightness (-b) option.
   Speed of the mode's animation can be provided by --speed (-s) option.
   If --save is provided the mode is saved in controller.`,
 
-	RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
 
-		return executeCommand(func(dev *libusb.Device, h *libusb.DeviceHandle) error {
-			return ite8291.SetMarqueeMode(h, config.Speed(), config.Brightness(), config.Save())
-		})
-	},
-}
+			return call(func(ctl *ite8291.Controller) error {
+				return ctl.SetMarqueeMode(speed(), brightness(), save())
+			})
+		},
+	}
 
-func init() {
-	rootCmd.AddCommand(marqueeModeCmd)
+	speed = params.AddSpeed(marqueeModeCmd, v)
+	brightness = params.AddBrightness(marqueeModeCmd, v)
+	save = params.AddSave(marqueeModeCmd, v)
 
-	config.AddSpeedFlag(marqueeModeCmd)
-	config.AddBrightnessFlag(marqueeModeCmd)
-
-	config.AddSaveFlag(marqueeModeCmd)
+	return marqueeModeCmd
 }

@@ -22,38 +22,36 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"github.com/gotmc/libusb/v2"
 	"github.com/spf13/cobra"
-	"github.com/v4n6/ite8291r3tool/config"
-	ite8291 "github.com/v4n6/ite8291r3tool/pkg"
+	"github.com/spf13/viper"
+	"github.com/v4n6/ite8291r3tool/params"
+	"github.com/v4n6/ite8291r3tool/pkg/ite8291"
 )
 
-// setColorCmd represents the set-color command
-var setColorCmd = &cobra.Command{
-	Use:   "set-color",
-	Short: "Set keyboard backlight predefined color.",
-	Long: `Set a predefined color of the keyboard backlight to the provided RGB value.
+// newSetColorCmd creates, initializes and returns command
+// to set keyboard backlight predefined color.
+func newSetColorCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
+
+	var colorNum func() byte
+	var color func() *ite8291.Color
+
+	// setColorCmd represents the set-color command
+	var setColorCmd = &cobra.Command{
+		Use:   "set-color",
+		Short: "Set keyboard backlight predefined color.",
+		Long: `Set a predefined color of the keyboard backlight to the provided RGB value.
   The predefined color must be specified by its number provided by --color-num options.
   The RGB value must be provided by one or more of its atoms using --red, --green, --blue options.`,
 
-	RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return call(func(ctl *ite8291.Controller) error {
+				return ctl.SetColor(colorNum(), color())
+			})
+		},
+	}
 
-		return executeCommand(func(dev *libusb.Device, h *libusb.DeviceHandle) error {
-			return ite8291.SetColor(h, config.AssignableColorNum(),
-				config.ColorRed(), config.ColorGreen(), config.ColorBlue())
-		})
-	},
-}
+	colorNum = params.AddAssignableColorNum(setColorCmd, v)
+	color = params.AddColor(setColorCmd, v)
 
-func init() {
-	rootCmd.AddCommand(setColorCmd)
-
-	config.AddAssignableColorNumFlag(setColorCmd)
-
-	config.AddRedColorFlag(setColorCmd)
-	config.AddGreenColorFlag(setColorCmd)
-	config.AddBlueColorFlag(setColorCmd)
-
-	setColorCmd.MarkFlagsOneRequired("red", "green", "blue")
-	_ = setColorCmd.MarkFlagRequired("color-num")
+	return setColorCmd
 }

@@ -23,43 +23,51 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"text/template"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/v4n6/ite8291r3tool/pkg/ite8291"
 )
 
-const (
-	isOnMessage  = "On"
-	isOffMessage = "Off"
-)
+const deviceOutputTemplate = "Bus:{{printf \"%03d\" .BusNumber}} Device:{{printf \"%03d\" .DeviceAddress}} Port:{{printf \"%03d\" .PortNumber}} Vendor:{{printf \"%04x\" .VendorID}} Product:{{printf \"%04x\" .ProductID}} Rev:{{ .DeviceReleaseNumber}}"
 
-// newStateCmd creates, initializes and returns command
-// to get and print keyboard backlight state.
-func newStateCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
+// newListDevicesCmd creates, initializes and returns command
+// to list all available supported devices.
+func newListDevicesCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
 
-	// stateCmd represents the state command
-	var stateCmd = &cobra.Command{
-		Use:   "state",
-		Short: "Get the current state of the keyboard backlight.",
-		Long:  `Print state of the keyboard backlight as either 'on' or 'off'.`,
+	// listDevicesCmd represents the list-devices command
+	return &cobra.Command{
+		Use:   "list-devices",
+		Short: "List supported devices",
+		Long:  `List supported devices`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return call(func(ctl *ite8291.Controller) error {
-				isOn, err := ctl.State()
+
+			descs, err := ite8291.ListDevices()
+			if err != nil {
+				return err
+			}
+
+			tmpl, err := template.New("device").Parse(deviceOutputTemplate)
+			if err != nil {
+				return err
+			}
+
+			if len(descs) == 0 {
+				fmt.Println("No supported devices found")
+				return nil
+			}
+
+			for _, d := range descs {
+
+				err = tmpl.Execute(os.Stdout, d)
 				if err != nil {
 					return err
 				}
+			}
 
-				if isOn {
-					fmt.Fprintln(cmd.OutOrStdout(), isOnMessage)
-				} else {
-					fmt.Fprintln(cmd.OutOrStdout(), isOffMessage)
-				}
-
-				return nil
-			})
+			return nil
 		},
 	}
-
-	return stateCmd
 }

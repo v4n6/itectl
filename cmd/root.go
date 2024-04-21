@@ -24,109 +24,147 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"slices"
+	"time"
 
-	"github.com/adrg/xdg"
-	"github.com/gotmc/libusb/v2"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/v4n6/ite8291r3tool/config"
-	ite8291 "github.com/v4n6/ite8291r3tool/pkg"
+	"github.com/v4n6/ite8291r3tool/params"
+	"github.com/v4n6/ite8291r3tool/pkg/ite8291"
 )
 
-const configName = "ite8291r3tool"
-
-const configType = "yaml"
-
-var cfgFile string
-
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "ite8291r3tool",
-	Short: "A brief description of your application",
-	Long:  `ROOOT1`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
-}
-
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
+// Execute executes the application
 func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
-		os.Exit(1)
-	}
-}
-
-func init() {
-	cobra.OnInitialize(initConfig)
 
 	cobra.EnableTraverseRunHooks = true
+	args := os.Args[1:]
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "Configuration file to use instead of xdg config files.")
-
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-
-	config.AddPollFlags(rootCmd)
-}
-
-// initConfig reads in config file and ENV variables if set.
-func initConfig() {
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-
-		for _, dir := range xdg.ConfigDirs {
-			mergeConfig(dir)
-		}
-		mergeConfig(xdg.ConfigHome)
-	}
-
-	viper.AutomaticEnv() // read in environment variables that match
-}
-
-// mergeConfig ...
-func mergeConfig(dir string) {
 	v := viper.New()
-	v.SetConfigName(configName)
-	v.SetConfigType(configType)
 
-	v.AddConfigPath(dir)
-	err := v.ReadInConfig()
+	rootCmd := newRootCmd(v, findIte8291r3) // root command
+	cmd, _, err := rootCmd.Find(args)       // get sub-command
 	if err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-			fmt.Fprintf(os.Stderr, "Error reading configuration: %v\n", err)
+		cobra.CheckErr(err)
+	}
+
+	// read provided config file or read & merge default configuration files
+	if err := params.ReadConfig(cmd, v, args); err != nil {
+		cobra.CheckErr(err)
+	}
+
+	v.AutomaticEnv() // read in environment variables that match
+
+	if cmd.Use == rootCmd.Use {
+		// no sub-command provided
+		defaultMode := params.DefaultMode(v) // configured default mode
+		if len(defaultMode) > 0 {
+			// insert default mode command
+			rootCmd.SetArgs(slices.Insert(args, 0, fmt.Sprintf("%s-mode", defaultMode)))
 		}
 	}
 
-	err = viper.GetViper().MergeConfigMap(v.AllSettings())
-	if err != nil {
-		// should never happen
-		fmt.Fprintf(os.Stderr, "%v\n", err)
+	if err := rootCmd.Execute(); err != nil {
+		cobra.CheckErr(err)
 	}
 }
 
-type ite8291Command func(dev *libusb.Device, h *libusb.DeviceHandle) error
+// ite8291r3Call is a function that calls a method on provided controller
+type ite8291r3Call func(ctl *ite8291.Controller) error
 
-func findDevice() (*libusb.Device, *libusb.DeviceHandle, func(), error) {
+// ite8291r3Ctl is a function that provides ite8291r3 controller and calls given f on it
+type ite8291r3Ctl func(f ite8291r3Call) error
 
-	if config.Poll() {
+// findDevice is a function that finds ite8291r3 device based om specified parameters
+// useDevice specifies whether a specific device identified by bus and address must be used
+// poll specifies whether function must poll for device presence
+// in given pollInterval intervals with given pollTimeout timeout
+type findDevice func(useDevice bool, bus, address int, poll bool, pollInterval, pollTimeout time.Duration) (dev ite8291.Device, err error)
 
-		return ite8291.GetDeviceWithPolling(config.PollInterval(), config.PollTimeout())
+// findIte8291r3 finds implements findDevice function.
+// It finds ite8291r3 device based om specified parameters
+// useDevice specifies whether a specific device identified by bus and address must be used
+// poll specifies whether function must poll for device presence
+// in given pollInterval intervals with given pollTimeout timeout
+func findIte8291r3(useDevice bool, bus, address int,
+	poll bool, pollInterval, pollTimeout time.Duration) (dev ite8291.Device, err error) {
+
+	devChecker := ite8291.VendorProductDeviceCheckerFunc
+	if useDevice {
+		devChecker = ite8291.NewAddressDeviceCheckerFunc(bus, address)
 	}
 
-	return ite8291.GetDevice()
+	devFinder := ite8291.FindDeviceWithoutPollingFunc
+	if poll {
+		devFinder = ite8291.NewFindDeviceWithPollingFunc(pollInterval, pollTimeout)
+	}
+
+	return ite8291.GetDevice(devFinder, devChecker)
 }
 
-// executeCommand executes given cmd providing obtained instance of device
-func executeCommand(cmd ite8291Command) error {
+// newRootCmd creates and returns initialized root command.
+// v is a viper instance used by commands instead of static one.
+// find is findDevice function used to obtain ite8291r3 device instance.
+func newRootCmd(v *viper.Viper, find findDevice) *cobra.Command {
 
-	dev, h, done, err := findDevice()
-	if err != nil {
-		return err
+	var cfgFile string // viper config file provided by user
+
+	// rootCmd represents the base command when called without any subcommands
+	var rootCmd = &cobra.Command{
+		Use:              "ite8291r3ctl",
+		Short:            "Control ite8291r3 keyboard backlight",
+		Long:             `Control ite8291r3 keyboard backlight`,
+		TraverseChildren: true,
 	}
-	defer done()
 
-	return cmd(dev, h)
+	// add --config flag to override viper config file discovery
+	rootCmd.PersistentFlags().StringVar(&cfgFile, params.ConfigFileFlag, "",
+		fmt.Sprintf("Configuration file to use instead of xdg config files [\"/etc/%[1]s.%[2]s\",\"~/.config/%[1]s.%[2]s\"]",
+			params.ConfigName, params.ConfigType))
+	// add poll relative parameters
+	poll, pollInterval, pollTimeout := params.AddPoll(rootCmd, v)
+	// add reset parameters
+	reset, predefinedColors := params.AddReset(rootCmd, v)
+	// add deice relative parameters
+	useDevive, deviceBus, deviceAddress := params.AddDevice(rootCmd, v)
+
+	// function that obtains ite8291r3 controller and calls given f on it
+	exec := func(f ite8291r3Call) error {
+
+		dev, err := find(useDevive(), deviceBus(), deviceAddress(), poll(), pollInterval(), pollTimeout())
+		if err != nil {
+			return err
+		}
+
+		ctl := ite8291.NewController(dev)
+		defer ctl.Close()
+
+		if reset() {
+			if err := ctl.SetColors(predefinedColors()); err != nil {
+				return err
+			}
+		}
+
+		return f(ctl)
+	}
+
+	// build commands hierarchy
+	rootCmd.AddCommand(newOffModeCmd(v, exec))
+	rootCmd.AddCommand(newAuroraModeCmd(v, exec))
+	rootCmd.AddCommand(newBreathModeCmd(v, exec))
+	rootCmd.AddCommand(newFireworksModeCmd(v, exec))
+	rootCmd.AddCommand(newMarqueeModeCmd(v, exec))
+	rootCmd.AddCommand(newRainbowModeCmd(v, exec))
+	rootCmd.AddCommand(newRaindropModeCmd(v, exec))
+	rootCmd.AddCommand(newRandomModeCmd(v, exec))
+	rootCmd.AddCommand(newRippleModeCmd(v, exec))
+	rootCmd.AddCommand(newSingleColorModeCmd(v, exec))
+	rootCmd.AddCommand(newWaveModeCmd(v, exec))
+	rootCmd.AddCommand(newGetBrightnessCmd(v, exec))
+	rootCmd.AddCommand(newSetBrightnessCmd(v, exec))
+	rootCmd.AddCommand(newGetFirmwareVersionCmd(v, exec))
+	rootCmd.AddCommand(newStateCmd(v, exec))
+	rootCmd.AddCommand(newSetColorCmd(v, exec))
+	rootCmd.AddCommand(newListDevicesCmd(v, exec))
+
+	return rootCmd
 }

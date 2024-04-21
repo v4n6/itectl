@@ -22,39 +22,38 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"github.com/gotmc/libusb/v2"
 	"github.com/spf13/cobra"
-	"github.com/v4n6/ite8291r3tool/config"
-	ite8291 "github.com/v4n6/ite8291r3tool/pkg"
+	"github.com/spf13/viper"
+	"github.com/v4n6/ite8291r3tool/params"
+	"github.com/v4n6/ite8291r3tool/pkg/ite8291"
 )
 
-// singleColorModeCmd represents the single-color-mode command
-var singleColorModeCmd = &cobra.Command{
-	Use:   "single-color-mode",
-	Short: "Set keyboard backlight to single color",
-	Long: `Set keyboard backlight to the given color.
+// newSingleColorModeCmd creates, initializes and returns command
+// to set keyboard backlight to single color mode.
+func newSingleColorModeCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
+
+	var brightness func() byte
+	var color func() *ite8291.Color
+	var save func() bool
+
+	// singleColorModeCmd represents the single-color-mode command
+	var singleColorModeCmd = &cobra.Command{
+		Use:   "single-color-mode",
+		Short: "Set keyboard backlight to single color",
+		Long: `Set keyboard backlight to the given color.
   The color is specified by its RGB atoms using --red, --green, --blue options.
   Brightness can be provided by --brightness (-b) option.
   If --save is provided the corresponding colors are saved in controller.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return call(func(ctl *ite8291.Controller) error {
+				return ctl.SetSingleColorMode(brightness(), color(), save())
+			})
+		},
+	}
 
-		return executeCommand(func(dev *libusb.Device, h *libusb.DeviceHandle) error {
-			return ite8291.SetSingleColorMode(dev, h, config.Brightness(),
-				config.ColorRed(), config.ColorGreen(), config.ColorBlue(), config.Save())
-		})
-	},
-}
+	brightness = params.AddBrightness(singleColorModeCmd, v)
+	color = params.AddSingleColor(singleColorModeCmd, v)
+	save = params.AddSave(singleColorModeCmd, v)
 
-func init() {
-	rootCmd.AddCommand(singleColorModeCmd)
-
-	config.AddBrightnessFlag(singleColorModeCmd)
-
-	config.AddRedColorFlag(singleColorModeCmd)
-	config.AddGreenColorFlag(singleColorModeCmd)
-	config.AddBlueColorFlag(singleColorModeCmd)
-
-	config.AddSaveFlag(singleColorModeCmd)
-
-	singleColorModeCmd.MarkFlagsOneRequired("red", "green", "blue")
+	return singleColorModeCmd
 }

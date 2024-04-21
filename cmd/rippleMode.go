@@ -22,17 +22,27 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"github.com/gotmc/libusb/v2"
 	"github.com/spf13/cobra"
-	"github.com/v4n6/ite8291r3tool/config"
-	ite8291 "github.com/v4n6/ite8291r3tool/pkg"
+	"github.com/spf13/viper"
+	"github.com/v4n6/ite8291r3tool/params"
+	"github.com/v4n6/ite8291r3tool/pkg/ite8291"
 )
 
-// rippleModeCmd represents the ripple-mode command
-var rippleModeCmd = &cobra.Command{
-	Use:   "ripple-mode",
-	Short: "Set keyboard backlight to 'ripple' mode.",
-	Long: `Set keyboard backlight to 'ripple' mode.
+// newRippleModeCmd creates, initializes and returns command
+// to set keyboard backlight to ripple mode.
+func newRippleModeCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
+
+	var speed func() byte
+	var brightness func() byte
+	var colorNum func() byte
+	var reactive func() bool
+	var save func() bool
+
+	// rippleModeCmd represents the ripple-mode command
+	var rippleModeCmd = &cobra.Command{
+		Use:   "ripple-mode",
+		Short: "Set keyboard backlight to 'ripple' mode.",
+		Long: `Set keyboard backlight to 'ripple' mode.
   Brightness of the mode can be provided by --brightness (-b) option.
   Speed of the mode's animation can be provided by --speed (-s) option.
   The predefined color used by the mode can be specified by its number provided by --color-num options.
@@ -40,22 +50,18 @@ var rippleModeCmd = &cobra.Command{
   If --reactive is provided the backlight reacts to user input.
   If --save is provided the mode is saved in controller.`,
 
-	RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return call(func(ctl *ite8291.Controller) error {
+				return ctl.SetRippleMode(speed(), brightness(), colorNum(), reactive(), save())
+			})
+		},
+	}
 
-		return executeCommand(func(dev *libusb.Device, h *libusb.DeviceHandle) error {
-			return ite8291.SetRippleMode(h, config.Speed(), config.Brightness(), config.ColorNum(),
-				config.Reactive(), config.Save())
-		})
-	},
-}
+	speed = params.AddSpeed(rippleModeCmd, v)
+	brightness = params.AddBrightness(rippleModeCmd, v)
+	colorNum = params.AddColorNum(rippleModeCmd, v)
+	reactive = params.AddReactive(rippleModeCmd, v)
+	save = params.AddSave(rippleModeCmd, v)
 
-func init() {
-	rootCmd.AddCommand(rippleModeCmd)
-
-	config.AddSpeedFlag(rippleModeCmd)
-	config.AddBrightnessFlag(rippleModeCmd)
-	config.AddColorNumFlag(rippleModeCmd)
-
-	config.AddReactiveFlag(rippleModeCmd)
-	config.AddSaveFlag(rippleModeCmd)
+	return rippleModeCmd
 }

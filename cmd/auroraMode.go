@@ -22,40 +22,46 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"github.com/gotmc/libusb/v2"
 	"github.com/spf13/cobra"
-	"github.com/v4n6/ite8291r3tool/config"
-	ite8291 "github.com/v4n6/ite8291r3tool/pkg"
+	"github.com/spf13/viper"
+	"github.com/v4n6/ite8291r3tool/params"
+	"github.com/v4n6/ite8291r3tool/pkg/ite8291"
 )
 
-// auroraCmd represents the aurora-mode command
-var auroraModeCmd = &cobra.Command{
-	Use:   "aurora-mode",
-	Short: "Set keyboard backlight to 'aurora' mode.",
-	Long: `Set keyboard backlight to 'aurora' mode.
+// newAuroraModeCmd creates, initializes and returns command
+// to set keyboard backlight to aurora mode.
+func newAuroraModeCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
+
+	var speed func() byte
+	var brightness func() byte
+	var colorNum func() byte
+	var reactive func() bool
+	var save func() bool
+
+	// auroraCmd represents the aurora-mode command
+	var auroraModeCmd = &cobra.Command{
+		Use:   "aurora-mode",
+		Short: "Set keyboard backlight to 'aurora' mode.",
+		Long: `Set keyboard backlight to 'aurora' mode.
   Brightness of the mode can be provided by --brightness (-b) option.
   Speed of the mode's animation can be provided by --speed (-s) option.
   The predefined color used by the mode can be specified by its number provided by --color-num options.
   Color number '0' indicates black (none) color. Color number '8' indicates random color.
   If --reactive is provided the backlight reacts to user input.
   If --save is provided the mode is saved in controller.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return call(func(ctl *ite8291.Controller) error {
+				return ctl.SetAuroraMode(speed(), brightness(), colorNum(),
+					reactive(), save())
+			})
+		},
+	}
 
-		return executeCommand(func(dev *libusb.Device, h *libusb.DeviceHandle) error {
-			return ite8291.SetAuroraMode(h, config.Speed(), config.Brightness(), config.ColorNum(),
-				config.Reactive(), config.Save())
-		})
-	},
-}
+	speed = params.AddSpeed(auroraModeCmd, v)
+	brightness = params.AddBrightness(auroraModeCmd, v)
+	colorNum = params.AddColorNum(auroraModeCmd, v)
+	reactive = params.AddReactive(auroraModeCmd, v)
+	save = params.AddSave(auroraModeCmd, v)
 
-func init() {
-
-	rootCmd.AddCommand(auroraModeCmd)
-
-	config.AddSpeedFlag(auroraModeCmd)
-	config.AddBrightnessFlag(auroraModeCmd)
-	config.AddColorNumFlag(auroraModeCmd)
-
-	config.AddReactiveFlag(auroraModeCmd)
-	config.AddSaveFlag(auroraModeCmd)
+	return auroraModeCmd
 }

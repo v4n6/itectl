@@ -22,38 +22,45 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"github.com/gotmc/libusb/v2"
 	"github.com/spf13/cobra"
-	"github.com/v4n6/ite8291r3tool/config"
-	ite8291 "github.com/v4n6/ite8291r3tool/pkg"
+	"github.com/spf13/viper"
+	"github.com/v4n6/ite8291r3tool/params"
+	"github.com/v4n6/ite8291r3tool/pkg/ite8291"
 )
 
-// randomModeCmd represents the random-mode command
-var randomModeCmd = &cobra.Command{
-	Use:   "random-mode",
-	Short: "Set keyboard backlight to 'random' mode.",
-	Long: `Set keyboard backlight to 'random' mode.
+// newRandomModeCmd creates, initializes and returns command
+// to set keyboard backlight to random mode.
+func newRandomModeCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
+
+	var speed func() byte
+	var brightness func() byte
+	var colorNum func() byte
+	var reactive func() bool
+	var save func() bool
+
+	// randomModeCmd represents the random-mode command
+	var randomModeCmd = &cobra.Command{
+		Use:   "random-mode",
+		Short: "Set keyboard backlight to 'random' mode.",
+		Long: `Set keyboard backlight to 'random' mode.
   Brightness of the mode can be provided by --brightness (-b) option.
   Speed of the mode's animation can be provided by --speed (-s) option.
   The predefined color used by the mode can be specified by its number provided by --color-num options.
   Color number '0' indicates black (none) color. Color number '8' indicates random color.
   If --reactive is provided the backlight reacts to user input.
   If --save is provided the mode is saved in controller.`,
-	RunE: func(cmd *cobra.Command, args []string) error {
-		return executeCommand(func(dev *libusb.Device, h *libusb.DeviceHandle) error {
-			return ite8291.SetRandomMode(h, config.Speed(), config.Brightness(), config.ColorNum(),
-				config.Reactive(), config.Save())
-		})
-	},
-}
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return call(func(ctl *ite8291.Controller) error {
+				return ctl.SetRandomMode(speed(), brightness(), colorNum(), reactive(), save())
+			})
+		},
+	}
 
-func init() {
-	rootCmd.AddCommand(randomModeCmd)
+	speed = params.AddSpeed(randomModeCmd, v)
+	brightness = params.AddBrightness(randomModeCmd, v)
+	colorNum = params.AddColorNum(randomModeCmd, v)
+	reactive = params.AddReactive(randomModeCmd, v)
+	save = params.AddSave(randomModeCmd, v)
 
-	config.AddSpeedFlag(randomModeCmd)
-	config.AddBrightnessFlag(randomModeCmd)
-	config.AddColorNumFlag(randomModeCmd)
-
-	config.AddReactiveFlag(randomModeCmd)
-	config.AddSaveFlag(randomModeCmd)
+	return randomModeCmd
 }

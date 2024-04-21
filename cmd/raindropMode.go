@@ -22,38 +22,43 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"github.com/gotmc/libusb/v2"
 	"github.com/spf13/cobra"
-	"github.com/v4n6/ite8291r3tool/config"
-	ite8291 "github.com/v4n6/ite8291r3tool/pkg"
+	"github.com/spf13/viper"
+	"github.com/v4n6/ite8291r3tool/params"
+	"github.com/v4n6/ite8291r3tool/pkg/ite8291"
 )
 
-// raindropModeCmd represents the raindrop-mode command
-var raindropModeCmd = &cobra.Command{
-	Use:   "raindrop-mode",
-	Short: "Set keyboard backlight to 'raindrop' mode.",
-	Long: `Set keyboard backlight to 'raindrop' mode.
+// newRaindropModeCmd creates, initializes and returns command
+// to set keyboard backlight to raindrop mode.
+func newRaindropModeCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
+
+	var speed func() byte
+	var brightness func() byte
+	var colorNum func() byte
+	var save func() bool
+
+	// raindropModeCmd represents the raindrop-mode command
+	var raindropModeCmd = &cobra.Command{
+		Use:   "raindrop-mode",
+		Short: "Set keyboard backlight to 'raindrop' mode.",
+		Long: `Set keyboard backlight to 'raindrop' mode.
 	Brightness of the mode can be provided by --brightness (-b) option.
   Speed of the mode's animation can be provided by --speed (-s) option.
   The predefined color used by the mode can be specified by its number provided by --color-num options.
   Color number '0' indicates black (none) color. Color number '8' indicates random color.
   If --save is provided the mode is saved in controller.`,
 
-	RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return call(func(ctl *ite8291.Controller) error {
+				return ctl.SetRaindropMode(speed(), brightness(), colorNum(), save())
+			})
+		},
+	}
 
-		return executeCommand(func(dev *libusb.Device, h *libusb.DeviceHandle) error {
-			return ite8291.SetRainDropMode(h, config.Speed(), config.Brightness(), config.ColorNum(),
-				config.Save())
-		})
-	},
-}
+	speed = params.AddSpeed(raindropModeCmd, v)
+	brightness = params.AddBrightness(raindropModeCmd, v)
+	colorNum = params.AddColorNum(raindropModeCmd, v)
+	save = params.AddSave(raindropModeCmd, v)
 
-func init() {
-	rootCmd.AddCommand(raindropModeCmd)
-
-	config.AddSpeedFlag(raindropModeCmd)
-	config.AddBrightnessFlag(raindropModeCmd)
-	config.AddColorNumFlag(raindropModeCmd)
-
-	config.AddSaveFlag(raindropModeCmd)
+	return raindropModeCmd
 }
