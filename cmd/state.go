@@ -26,7 +26,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/v4n6/ite8291r3tool/pkg/ite8291"
+	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
 const (
@@ -36,7 +36,7 @@ const (
 
 // newStateCmd creates, initializes and returns command
 // to get and print keyboard backlight state.
-func newStateCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
+func newStateCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
 	// stateCmd represents the state command
 	var stateCmd = &cobra.Command{

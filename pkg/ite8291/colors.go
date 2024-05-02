@@ -5,27 +5,43 @@ import (
 	"fmt"
 )
 
+// InvalidColorFormatError error signaling invalid format of color text representation.
+var InvalidColorFormatError = errors.New("invalid color format")
+
+// SupportedColorStringFormats provides supported color text formats.
+var SupportedColorStringFormats = []string{
+	"0xHHHHHH",
+	"#xHHHHHH",
+	"#HHHHHH",
+	"HHHHHH",
+	"#HHH",
+	"HHH",
+}
+
+// Color type provides Color RGB representation.
 type Color struct {
 	Red   uint8
 	Green uint8
 	Blue  uint8
 }
 
-// String ...
+// String - stringer implementation.
 func (c *Color) String() string {
 	return fmt.Sprintf("#%02X%02X%02X", c.Red, c.Green, c.Blue)
 }
 
-// New ...
+// NewColor creates Color based on r,g,b params.
 func NewColor(r, g, b uint8) *Color {
 	return &Color{Red: r, Green: g, Blue: b}
 }
 
-func NewRGBColor(rgb uint32) *Color {
+// FromRGB creates Color based on given rgb uint.
+func FromRGB(rgb uint32) *Color {
 	return &Color{Red: byte(rgb >> 16 & 0xFF), Green: byte(rgb >> 8 & 0xFF), Blue: byte(rgb & 0xFF)}
 }
 
-// ParseColor ...
+// ParseColor parses s to Color.
+// It accepts following formats 0xHHHHHH,#xHHHHHH,#HHHHHH,HHHHHH,#HHH,HHH.
 func ParseColor(s string) (*Color, error) {
 
 	var i, l = 0, len(s)
@@ -101,8 +117,6 @@ func ParseColor(s string) (*Color, error) {
 	return NewColor(r*17, g*17, b*17), nil
 
 }
-
-var InvalidColorFormatError = errors.New("invalid color format")
 
 func hexToUint4(s string, idx int) (uint8, bool) {
 

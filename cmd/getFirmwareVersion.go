@@ -26,18 +26,20 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/v4n6/ite8291r3tool/pkg/ite8291"
+	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
-// newGetFirmwareVersionCmd creates, initializes and returns command
-// to get and print keyboard backlight controller firmware version.
-func newGetFirmwareVersionCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
+// getFirmwareVersionDescription - get-firmware-version command description
+const getFirmwareVersionDescription = "Retrieve and print firmware version of the keyboard backlight controller."
 
-	// getFirmwareVersionCmd represents the get-firmware-version command
+// newGetFirmwareVersionCmd creates, initializes and returns command
+// to retrieve and print keyboard backlight controller firmware version.
+func newGetFirmwareVersionCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
+
 	return &cobra.Command{
 		Use:   "get-firmware-version",
-		Short: "Get firmware version of the keyboard backlight.",
-		Long:  `Print firmware version of the keyboard backlight.`,
+		Short: getFirmwareVersionDescription,
+		Long:  getFirmwareVersionDescription,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return call(func(ctl *ite8291.Controller) error {
 				ver, err := ctl.GetFirmwareVersion()

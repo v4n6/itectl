@@ -8,61 +8,63 @@ import (
 )
 
 const (
-	// deviceBusDefault is default value of device usb bus
-	deviceBusDefault = 0
+	// DeviceBusDefault is default value of device usb bus
+	DeviceBusDefault = 0
 	// deviceBusDefault is default value of device usb address
-	deviceAddressDefault = 0
+	DeviceAddressDefault = 0
 )
 
 const (
 	// deviceBusProp is name of the device bus configuration property
 	deviceBusProp = "device.bus"
-	// deviceBusFlag is name of the device bus flag
-	deviceBusFlag = "device-bus"
+	// DeviceBusFlag is name of the device bus flag
+	DeviceBusFlag = "device-bus"
 
 	// deviceAddressProp is name of the device address configuration property
 	deviceAddressProp = "device.address"
-	// deviceAddressFlag is name of the device address flag
-	deviceAddressFlag = "device-address"
+	// DeviceAddressFlag is name of the device address flag
+	DeviceAddressFlag = "device-address"
 )
 
 // AddDevice adds device related flags to the provided cmd.
 // It also adds hook to bind them to the corresponding viper config properties
 // and to validate device properties. It ensures that either
 // both device bus and device address properties are not set, or both are set.
-// It returns functions to retrieve current device, deviceBus and deviceAddress values.
+// It returns functions to retrieve current useDevice, deviceBus and deviceAddress values.
 func AddDevice(cmd *cobra.Command, v *viper.Viper) (useDevice func() bool, deviceBus, deviceAddress func() int) {
 
-	var device bool
+	var useDev bool
 
-	cmd.PersistentFlags().Int(deviceBusFlag, deviceBusDefault, "Bus number of the keyboard backlight device.")
-	bindAndValidate(cmd, v, deviceBusFlag, deviceBusProp, nil)
-	cmd.PersistentFlags().Int(deviceAddressFlag, deviceAddressDefault, "Address of the keyboard backlight device.")
-	bindAndValidate(cmd, v, deviceAddressFlag, deviceAddressProp, nil)
+	cmd.PersistentFlags().Int(DeviceBusFlag, DeviceBusDefault,
+		fmt.Sprintf("Bus number of the keyboard backlight device. %s", configurationWarning))
+	bindAndValidate(cmd, v, DeviceBusFlag, deviceBusProp, nil)
+	cmd.PersistentFlags().Int(DeviceAddressFlag, DeviceAddressDefault,
+		fmt.Sprintf("Address of the keyboard backlight device. %s", configurationWarning))
+	bindAndValidate(cmd, v, DeviceAddressFlag, deviceAddressProp, nil)
 
 	addValidationHook(cmd, func() error {
 
-		if !(v.IsSet(deviceBusProp) || cmd.Flag(deviceBusFlag).Changed) &&
-			!(v.IsSet(deviceAddressProp) || cmd.Flag(deviceAddressFlag).Changed) {
-
-			return nil
+		if !(v.IsSet(deviceBusProp) || cmd.Flag(DeviceBusFlag).Changed) &&
+			!(v.IsSet(deviceAddressProp) || cmd.Flag(DeviceAddressFlag).Changed) {
+			useDev = false
+			return nil // device is not set
 		}
 
-		if v.IsSet(deviceBusProp) || cmd.Flag(deviceBusFlag).Changed {
-			if !(v.IsSet(deviceAddressProp) || cmd.Flag(deviceAddressFlag).Changed) {
-				return fmt.Errorf("%w: missing device adddress (either configured or specified explicitly via --%s flag)",
-					InvalidOptionValueError, deviceAddressFlag)
+		if v.IsSet(deviceBusProp) || cmd.Flag(DeviceBusFlag).Changed {
+			if !(v.IsSet(deviceAddressProp) || cmd.Flag(DeviceAddressFlag).Changed) {
+				return fmt.Errorf("%w device address missing for \"--%s\" (either configured or specified explicitly)",
+					InvalidOptionValueError, DeviceAddressFlag)
 			}
-		} else if v.IsSet(deviceAddressProp) || cmd.Flag(deviceAddressFlag).Changed {
-			return fmt.Errorf("%w: missing device bus number (either configured or specified explicitly via --%s flag)",
-				InvalidOptionValueError, deviceBusFlag)
+		} else if v.IsSet(deviceAddressProp) || cmd.Flag(DeviceAddressFlag).Changed {
+			return fmt.Errorf("%w device bus number missing for \"--%s\" (either configured or specified explicitly)",
+				InvalidOptionValueError, DeviceBusFlag)
 		}
 
-		device = true
+		useDev = true
 		return nil
 	})
 
-	return func() bool { return device },
+	return func() bool { return useDev },
 		func() int { return v.GetInt(deviceBusProp) },
 		func() int { return v.GetInt(deviceAddressProp) }
 }

@@ -24,30 +24,32 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/v4n6/ite8291r3tool/params"
-	"github.com/v4n6/ite8291r3tool/pkg/ite8291"
+	"github.com/v4n6/itectl/params"
+	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
+// breathModeDescription - breath-mode command description
+const breathModeDescription = "Set keyboard backlight to 'breathing' mode."
+
 // newBreathModeCmd creates, initializes and returns command
-// to set keyboard backlight to breathing mode.
-func newBreathModeCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
+// to set keyboard backlight to 'breathing' mode.
+func newBreathModeCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
 	var speed func() byte
 	var brightness func() byte
 	var colorNum func() byte
 	var save func() bool
+	var optionallyResetColors ite8291Call
 
-	var breathModeCmd = &cobra.Command{
+	breathModeCmd := &cobra.Command{
 		Use:   "breath-mode",
-		Short: "Set keyboard backlight to 'breathing' mode.",
-		Long: `Set keyboard backlight to 'breathing' mode.
-  Brightness of the mode can be provided by --brightness (-b) option.
-  Speed of the mode's animation can be provided by --speed (-s) option.
-  The predefined color used by the mode can be specified by its number provided by --color-num options.
-  Color number '0' indicates black (none) color. Color number '8' indicates random color.
-  If --save is provided the mode is saved in controller.`,
+		Short: breathModeDescription,
+		Long:  breathModeDescription,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return call(func(ctl *ite8291.Controller) error {
+				if err := optionallyResetColors(ctl); err != nil {
+					return err
+				}
 				return ctl.SetBreathingMode(speed(), brightness(), colorNum(), save())
 			})
 		},
@@ -57,6 +59,7 @@ func newBreathModeCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
 	brightness = params.AddBrightness(breathModeCmd, v)
 	colorNum = params.AddColorNum(breathModeCmd, v)
 	save = params.AddSave(breathModeCmd, v)
+	optionallyResetColors = params.AddReset(breathModeCmd, v)
 
 	return breathModeCmd
 }

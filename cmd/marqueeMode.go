@@ -24,30 +24,31 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/v4n6/ite8291r3tool/params"
-	"github.com/v4n6/ite8291r3tool/pkg/ite8291"
+	"github.com/v4n6/itectl/params"
+	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
+// auroraModeDescription - marquee-mode command description
+const marqueeModeDescription = "Set keyboard backlight to 'marquee' mode."
+
 // newMarqueeModeCmd creates, initializes and returns command
-// to set keyboard backlight to marquee mode.
-func newMarqueeModeCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
+// to set keyboard backlight to 'marquee' mode.
+func newMarqueeModeCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
 	var brightness func() byte
 	var speed func() byte
 	var save func() bool
+	var optionallyResetColors ite8291Call
 
-	// marqueeModeCmd represents the marquee-mode command
 	var marqueeModeCmd = &cobra.Command{
 		Use:   "marquee-mode",
-		Short: "Set keyboard backlight to 'marquee' mode.",
-		Long: `Set keyboard backlight to 'marquee' mode.
-	Brightness of the mode can be provided by --brightness (-b) option.
-  Speed of the mode's animation can be provided by --speed (-s) option.
-  If --save is provided the mode is saved in controller.`,
-
+		Short: marqueeModeDescription,
+		Long:  marqueeModeDescription,
 		RunE: func(cmd *cobra.Command, args []string) error {
-
 			return call(func(ctl *ite8291.Controller) error {
+				if err := optionallyResetColors(ctl); err != nil {
+					return err
+				}
 				return ctl.SetMarqueeMode(speed(), brightness(), save())
 			})
 		},
@@ -56,6 +57,7 @@ func newMarqueeModeCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
 	speed = params.AddSpeed(marqueeModeCmd, v)
 	brightness = params.AddBrightness(marqueeModeCmd, v)
 	save = params.AddSave(marqueeModeCmd, v)
+	optionallyResetColors = params.AddReset(marqueeModeCmd, v)
 
 	return marqueeModeCmd
 }

@@ -1,2 +1,8 @@
 # Emacs backup files
 *~
+
+# go cover profiles
+coverprofile*
+
+# built binary
+itectl

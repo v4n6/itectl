@@ -1,13 +1,15 @@
-module github.com/v4n6/ite8291r3tool
+module github.com/v4n6/itectl
 
 go 1.22.2
 
 require (
 	github.com/adrg/xdg v0.4.0
+	github.com/google/uuid v1.6.0
 	github.com/gotmc/libusb/v2 v2.3.1
 	github.com/onsi/ginkgo/v2 v2.17.1
 	github.com/onsi/gomega v1.30.0
 	github.com/spf13/cobra v1.8.0
+	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.18.2
 )
 
@@ -27,7 +29,6 @@ require (
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect

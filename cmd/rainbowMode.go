@@ -24,27 +24,30 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/v4n6/ite8291r3tool/params"
-	"github.com/v4n6/ite8291r3tool/pkg/ite8291"
+	"github.com/v4n6/itectl/params"
+	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
+// rainbowModeDescription - rainbow-mode command description
+const rainbowModeDescription = "Set keyboard backlight to 'rainbow' mode."
+
 // newRainbowModeCmd creates, initializes and returns command
-// to set keyboard backlight to rainbow mode.
-func newRainbowModeCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
+// to set keyboard backlight to 'rainbow' mode.
+func newRainbowModeCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
 	var brightness func() byte
 	var save func() bool
+	var optionallyResetColors ite8291Call
 
-	// rainbowModeCmd represents the rainbow-mode command
 	var rainbowModeCmd = &cobra.Command{
 		Use:   "rainbow-mode",
-		Short: "Set keyboard backlight to 'rainbow' mode.",
-		Long: `Set keyboard backlight to 'rainbow' mode.
-  Brightness of the mode can be provided by --brightness (-b) option.
-  If --save is provided the mode is saved in controller.`,
-
+		Short: rainbowModeDescription,
+		Long:  rainbowModeDescription,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return call(func(ctl *ite8291.Controller) error {
+				if err := optionallyResetColors(ctl); err != nil {
+					return err
+				}
 				return ctl.SetRainbowMode(brightness(), save())
 			})
 		},
@@ -52,6 +55,7 @@ func newRainbowModeCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
 
 	brightness = params.AddBrightness(rainbowModeCmd, v)
 	save = params.AddSave(rainbowModeCmd, v)
+	optionallyResetColors = params.AddReset(rainbowModeCmd, v)
 
 	return rainbowModeCmd
 }

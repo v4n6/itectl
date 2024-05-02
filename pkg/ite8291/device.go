@@ -8,57 +8,55 @@ import (
 	"github.com/gotmc/libusb/v2"
 )
 
-// ite8291r3 request types
+// ite8291r3 request type
 const (
-	sendControlRequestType = byte(libusb.HostToDevice) | byte(libusb.Class) | byte(libusb.InterfaceRecipient)
-	rcvControlRequestType  = byte(libusb.DeviceToHost) | byte(libusb.Class) | byte(libusb.InterfaceRecipient)
+	SendControlRequestType    = byte(libusb.HostToDevice) | byte(libusb.Class) | byte(libusb.InterfaceRecipient)
+	ReceiveControlRequestType = byte(libusb.DeviceToHost) | byte(libusb.Class) | byte(libusb.InterfaceRecipient)
 )
 
-// vendor id of ite8291r3 usb device
+// vendorID - vendor id of ite8291r3 usb device
 const vendorID = 0x048D
 
-// product ids of ite8291r3 usb device
-var (
-	productIDs = map[uint16]bool{0x6004: true, 0x6006: true, 0xCE00: true}
-)
+// endpointOutDirection - out endpoint direction
+const endpointOutDirection libusb.EndpointDirection = 0
 
-// NoDeviceFoundError is an error indicating that no ite8291r3 device can be found
+// productIDs - supported product ids of ite8291r3 devices
+var productIDs = map[uint16]bool{0x6004: true, 0x6006: true, 0xCE00: true}
+
+// NoDeviceFoundError - error indicating that no ite8291r3 device found
 var NoDeviceFoundError = errors.New("no ite8291r3 device found")
 
-// UnsupportedDeviceError is an error indicating that a device with given bus and address is not an ite8291r3 device
+// UnsupportedDeviceError - error indicating that a device with given bus and address is not an ite8291r3 device
 var UnsupportedDeviceError = errors.New("is not ite8291 device")
 
-// NoOutEndpointFoundError is an error indicating that no out endpoint can be found at ite8291r3 device
+// NoOutEndpointFoundError - error indicating that no out endpoint found at ite8291r3 device
 var NoOutEndpointFoundError = errors.New("no output endpoint found")
 
-// USBDevice represents ite8291r3 usb device
+// USBDevice type provides ite8291r3 usb device
 type USBDevice struct {
-	ctx *libusb.Context
 	*libusb.DeviceHandle
+
+	ctx *libusb.Context
 	dev *libusb.Device
 }
 
-// Close ...
+// Close USBDevice. It closes underlying libusb.Contexst and libusb.DeviceHandle.
 func (d *USBDevice) Close() error {
-	err1 := d.DeviceHandle.Close()
-	err2 := d.ctx.Close()
 
-	if err1 != nil {
-		return err1
-	}
-	if err2 != nil {
-		return err2
+	err := d.DeviceHandle.Close()
+
+	if err := d.ctx.Close(); err != nil {
+		return err
 	}
 
-	return nil
+	return err
 }
 
-// WriteFunc is a write function that can be used to set keys colors.
+// WriteFunc type provides function intended to write bulk data to a USB device.
 type WriteFunc func(p []byte) (n int, err error)
 
-const endpointOutDirection libusb.EndpointDirection = 0
-
-// GetBulkWrite returns write function that can be used to set keys colors.
+// GetBulkWrite returns WriteFunc intended to write bulk data to the ite8291r3 device.
+// It is used to set color(s) of all/specific key(s) of keyboard backlight.
 func (d *USBDevice) GetBulkWrite() (WriteFunc, error) {
 
 	cfg, err := d.dev.ActiveConfigDescriptor()
@@ -83,49 +81,58 @@ func (d *USBDevice) GetBulkWrite() (WriteFunc, error) {
 	return nil, fmt.Errorf("%w", NoOutEndpointFoundError)
 }
 
-type Context interface {
-	DeviceList() ([]*libusb.Device, error)
-}
+// CheckDevice type provides function to check wether a given dev
+// is a supported ite8291r3 device.
+type CheckDevice func(dev *libusb.Device) (ok bool, err error)
 
-type DeviceCheckerFunc func(dev *libusb.Device) (bool, error)
-
-func VendorProductDeviceCheckerFunc(dev *libusb.Device) (bool, error) {
-	if d, err := dev.DeviceDescriptor(); err == nil &&
-		d.VendorID == vendorID && productIDs[d.ProductID] {
-
-		return true, nil
+// CheckDeviceByVendorProduct checks wether vendor and product ids
+// of given dev are that of supported ite8291r3 devices.
+func CheckDeviceByVendorProduct(dev *libusb.Device) (found bool, err error) {
+	d, err := dev.DeviceDescriptor()
+	if err != nil {
+		return false, err
 	}
 
-	return false, nil
+	return d.VendorID == vendorID && productIDs[d.ProductID], nil
 }
 
-func NewAddressDeviceCheckerFunc(bus, address int) DeviceCheckerFunc {
+// NewCheckDeviceByBusAddress returns CheckDevice function
+// that checks wether given dev has specified bus and address,
+// and its vendor and product ids are that of supported ite8291r3 devices.
+//
+// It returns instance of UnsupportedDeviceError if a device with
+// correct bus and address is not a supported ite8291r3 device.
+func NewCheckDeviceByBusAddress(bus, address int) CheckDevice {
 	return func(dev *libusb.Device) (bool, error) {
 		b, _ := dev.BusNumber()
 		a, _ := dev.DeviceAddress()
-		if bus == b && address == a {
+		if bus != b || address != a {
+			return false, nil
+		}
 
-			d, err := dev.DeviceDescriptor()
-			if err != nil {
-				return false, err
-			}
+		ok, err := CheckDeviceByVendorProduct(dev)
+		if err != nil {
+			return false, err
+		}
 
-			if d.VendorID != vendorID || !productIDs[d.ProductID] {
-				return false, fmt.Errorf("device (bus=%d,address=%d) %w", bus, address, UnsupportedDeviceError)
-			}
-
+		if ok {
 			return true, nil
 		}
 
-		return false, nil
+		return false, fmt.Errorf("device (bus=%d,address=%d) %w",
+			bus, address, UnsupportedDeviceError)
+
 	}
 }
 
-type FindDeviceFunc func(ctx *libusb.Context, checker DeviceCheckerFunc) (usbDevice *USBDevice, err error)
-
+// targetInterfaceNumber - interface number of ite8291r3 device to check and detach, if necessary, kernel driver.
 const targetInterfaceNumber = 1
 
-func FindDeviceWithoutPollingFunc(ctx *libusb.Context, checker DeviceCheckerFunc) (usbDevice *USBDevice, err error) {
+// LookupDevice traverses all usb devices and returns first found supported ite8291r3 device.
+// It uses given check function to decide whether a device is supported.
+// It returns pointer to found usbDevice or occured error.
+// LookupDevice returns instance of NoDeviceFoundError if no supported device found.
+func LookupDevice(ctx *libusb.Context, check CheckDevice) (usbDevice *USBDevice, err error) {
 
 	devs, err := ctx.DeviceList()
 	if err != nil {
@@ -133,165 +140,96 @@ func FindDeviceWithoutPollingFunc(ctx *libusb.Context, checker DeviceCheckerFunc
 	}
 
 	for _, dev := range devs {
-		match, err := checker(dev)
+
+		var found bool
+		found, err = check(dev)
+		if errors.Is(err, UnsupportedDeviceError) {
+			return nil, err // device found but it isn't an ite8291 device
+		}
+
+		if !(err == nil && found) {
+			continue // either not found or errored in checker -> save error and continue
+		}
+
+		// open handler
+		h, err := dev.Open()
 		if err != nil {
-			_ = ctx.Close()
 			return nil, err
 		}
-		if match {
-			h, err := dev.Open()
-			if err != nil {
-				_ = ctx.Close()
-				return nil, err
-			}
 
-			usbDevice = &USBDevice{DeviceHandle: h, dev: dev, ctx: ctx}
+		usbDevice = &USBDevice{DeviceHandle: h, dev: dev, ctx: ctx}
 
-			kern, err := usbDevice.KernelDriverActive(targetInterfaceNumber)
-			if err != nil {
-				_ = usbDevice.Close()
-				return nil, err
-			}
-
-			if kern {
-				if err = usbDevice.DetachKernelDriver(targetInterfaceNumber); err != nil {
-					_ = usbDevice.Close()
-					return nil, err
-				}
-			}
-
-			return usbDevice, nil
+		// detach kernel driver
+		kern, err := usbDevice.KernelDriverActive(targetInterfaceNumber)
+		if err != nil {
+			_ = h.Close() // close handle on error
+			return nil, err
 		}
+
+		if kern {
+			if err = usbDevice.DetachKernelDriver(targetInterfaceNumber); err != nil {
+				_ = h.Close() // close handle on error
+				return nil, err
+			}
+		}
+
+		return usbDevice, nil
+	}
+
+	if err != nil {
+		// report not found error together with saved error
+		return nil, fmt.Errorf("%w: %w", NoDeviceFoundError, err)
 	}
 
 	return nil, fmt.Errorf("%w", NoDeviceFoundError)
 }
 
-func NewFindDeviceWithPollingFunc(pollInterval, timeout time.Duration) FindDeviceFunc {
-
-	return func(ctx *libusb.Context, checker DeviceCheckerFunc) (usbDevice *USBDevice, err error) {
-
-		ticker := time.NewTicker(pollInterval)
-		defer ticker.Stop()
-
-		exit := make(chan bool)
-		go func() {
-			time.Sleep(timeout)
-			exit <- true
-		}()
-
-		for {
-
-			dev, err := FindDeviceWithoutPollingFunc(ctx, checker)
-			if err != nil && !errors.Is(err, NoDeviceFoundError) {
-				return nil, err
-			}
-
-			if err == nil {
-				return dev, nil
-			}
-
-			select {
-
-			case <-exit:
-				return nil, fmt.Errorf("%w", NoDeviceFoundError)
-
-			case <-ticker.C:
-			}
-		}
-	}
-}
-
-func GetDevice(finder FindDeviceFunc, checker DeviceCheckerFunc) (usbDevice *USBDevice, err error) {
+// FindDevice searches for a supported ite8291r3 device. check function decides whether a device is a supported one.
+//
+// If no device was found it repeats the search after pollInterval duration. If no device was found in timeout
+// duration, FindDevice returns instance of NoDeviceFoundError. If timeout is 0 or negative no further searches
+// are done and the error is returned immediately.
+func FindDevice(pollInterval, timeout time.Duration, check CheckDevice) (usbDevice *USBDevice, err error) {
 
 	ctx, err := libusb.NewContext()
 	if err != nil {
 		return nil, err
 	}
 
-	dev, err := finder(ctx, checker)
-	if err != nil {
-		if errors.Is(err, NoDeviceFoundError) {
+	if timeout <= 0 {
+		if usbDevice, err = LookupDevice(ctx, check); err != nil {
 			_ = ctx.Close()
 		}
-
-		return nil, err
+		return usbDevice, err
 	}
 
-	return dev, nil
-}
+	ticker := time.NewTicker(pollInterval)
+	defer ticker.Stop()
 
-func GetDeviceByVendorProduct() (usbDevice *USBDevice, err error) {
+	exit := make(chan bool)
+	go func() {
+		time.Sleep(timeout)
+		exit <- true
+	}()
 
-	return GetDevice(FindDeviceWithoutPollingFunc, VendorProductDeviceCheckerFunc)
-}
+	for {
 
-func GetDeviceByAddress(bus, address int) (usbDevice *USBDevice, err error) {
+		if usbDevice, err = LookupDevice(ctx, check); err == nil {
+			return usbDevice, err
+		}
 
-	return GetDevice(FindDeviceWithoutPollingFunc, NewAddressDeviceCheckerFunc(bus, address))
-}
-
-func GetDeviceWithPolling(pollInterval, timeout time.Duration) (usbDevice *USBDevice, err error) {
-
-	return GetDevice(NewFindDeviceWithPollingFunc(pollInterval, timeout), VendorProductDeviceCheckerFunc)
-}
-
-func GetDeviceByAddressWithPolling(bus, address int, pollInterval, timeout time.Duration) (usbDevice *USBDevice, err error) {
-
-	return GetDevice(NewFindDeviceWithPollingFunc(pollInterval, timeout), NewAddressDeviceCheckerFunc(bus, address))
-}
-
-type DeviceDescriptor struct {
-	*libusb.Descriptor
-	BusNumber     int
-	DeviceAddress int
-	PortNumber    int
-}
-
-func ListDevices() (devices []*DeviceDescriptor, err error) {
-
-	ctx, err := libusb.NewContext()
-	if err != nil {
-		return nil, err
-	}
-	defer ctx.Close()
-
-	devs, err := ctx.DeviceList()
-	if err != nil {
-		return nil, err
-	}
-
-	devices = []*DeviceDescriptor{}
-	for _, dev := range devs {
-		found, err := VendorProductDeviceCheckerFunc(dev)
-		if err != nil {
+		if err != nil && !errors.Is(err, NoDeviceFoundError) {
+			_ = ctx.Close()
 			return nil, err
 		}
-		if found {
-			d, err := dev.DeviceDescriptor()
-			if err != nil {
-				return nil, err
-			}
 
-			busNumber, err := dev.BusNumber()
-			if err != nil {
-				return nil, err
-			}
+		select {
 
-			deviceAddress, err := dev.DeviceAddress()
-			if err != nil {
-				return nil, err
-			}
+		case <-exit:
+			_ = ctx.Close()
+			return nil, err
 
-			portNumber, err := dev.PortNumber()
-			if err != nil {
-				return nil, err
-			}
-
-			devices = append(devices, &DeviceDescriptor{Descriptor: d,
-				BusNumber: busNumber, DeviceAddress: deviceAddress, PortNumber: portNumber})
+		case <-ticker.C:
 		}
 	}
-
-	return devices, nil
 }

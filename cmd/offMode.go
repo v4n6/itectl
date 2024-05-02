@@ -24,22 +24,34 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/v4n6/ite8291r3tool/pkg/ite8291"
+	"github.com/v4n6/itectl/params"
+	"github.com/v4n6/itectl/pkg/ite8291"
 )
+
+// offModeDescription - off-mode command description
+const offModeDescription = "Turn the keyboard backlight off."
 
 // newOffModeCmd creates, initializes and returns command
 // to set keyboard backlight off.
-func newOffModeCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
+func newOffModeCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
-	// offModeCmd represents the set-off command
-	return &cobra.Command{
+	var optionallyResetColors ite8291Call
+
+	offModeCmd := &cobra.Command{
 		Use:   "off-mode",
-		Short: "Turn the keyboard backlight off.",
-		Long:  `Turn the keyboard backlight off.`,
+		Short: offModeDescription,
+		Long:  offModeDescription,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return call(func(ctl *ite8291.Controller) error {
+				if err := optionallyResetColors(ctl); err != nil {
+					return err
+				}
 				return ctl.SetOffMode()
 			})
 		},
 	}
+
+	optionallyResetColors = params.AddReset(offModeCmd, v)
+
+	return offModeCmd
 }

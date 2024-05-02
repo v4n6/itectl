@@ -21,7 +21,7 @@ THE SOFTWARE.
 */
 package main
 
-import "github.com/v4n6/ite8291r3tool/cmd"
+import "github.com/v4n6/itectl/cmd"
 
 func main() {
 	cmd.Execute()

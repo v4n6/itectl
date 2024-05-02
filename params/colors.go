@@ -5,64 +5,67 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/v4n6/ite8291r3tool/pkg/ite8291"
+	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
 const (
-	// redDefault is default value of red flag.
-	redDefault = 0
-	// greenDefault is default value of green flag.
-	greenDefault = 0
-	// blueDefault is default value of blue flag.
-	blueDefault = 0
+	// RedDefault is default value of red flag.
+	RedDefault = 0
+	// GreenDefault is default value of green flag.
+	GreenDefault = 0
+	// BlueDefault is default value of blue flag.
+	BlueDefault = 0
 
-	// singleColorDefault is default value of single color configuration property.
-	singleColorDefault = "#FFFFFF"
+	// SingleColorDefault is default value of single color configuration property.
+	SingleColorDefault = "#FFFFFF"
 )
 
 const (
-	// colorRedFlag is name of red color flag.
-	colorRedFlag = "red"
-	// colorGreenFlag is name of green color flag.
-	colorGreenFlag = "green"
-	// colorBlueFlag is name of blue color flag.
-	colorBlueFlag = "blue"
+	// ColorRedFlag is name of the red color flag.
+	ColorRedFlag = "red"
+	// ColorGreenFlag is name of the green color flag.
+	ColorGreenFlag = "green"
+	// ColorBlueFlag is name of the blue color flag.
+	ColorBlueFlag = "blue"
 
-	// colorNameFlag is name of color name flag.
-	colorNameFlag = "color-name"
-	// colorRGBFlag is name of RGB flag.
-	colorRGBFlag = "rgb"
+	// ColorNameFlag is name of the color name flag.
+	ColorNameFlag = "color-name"
+	// ColorRGBFlag is name of the RGB flag.
+	ColorRGBFlag = "rgb"
 
-	// singleColorProp is name of single color configuration property.
-	singleColorProp = "singleModeColor"
+	// SingleColorProp is name of the single color configuration property.
+	SingleColorProp = "singleModeColor"
 
-	// namedColorsProp is name of named colors configuration property.
-	namedColorsProp = "namedColors"
+	// NamedColorsProp is name of the named colors configuration property.
+	NamedColorsProp = "namedColors"
 )
 
 // colorNameToColor converts given color name to the corresponding instance of ite8291.Color.
 // It returns InvalidOptionValueError if color name was not configured or
-// color's value is not a valid color.
+// its value is not a valid color.
 func colorNameToColor(name string, v *viper.Viper) (color *ite8291.Color, err error) {
 
-	v_ := v.Sub(namedColorsProp)
-	if v_ != nil {
-		if val := v_.GetString(name); val != "" {
+	if v_ := v.Sub(NamedColorsProp); v_ != nil {
+
+		if val := v_.GetString(name); len(val) > 0 {
+
 			color, err = ite8291.ParseColor(val)
 			if err != nil {
-				return nil, fmt.Errorf("%w: color name %q: %w", InvalidOptionValueError, name, err)
+				return nil, fmt.Errorf("%w %q for %q: %w", InvalidOptionValueError, name,
+					fmt.Sprintf("--%s", ColorNameFlag), err)
 			}
 
 			return color, nil
 		}
 	}
 
-	return nil, fmt.Errorf("%w: unknown color name %q", InvalidOptionValueError, name)
+	return nil, fmt.Errorf("%w %q for %q is an unknown color name", InvalidOptionValueError, name,
+		fmt.Sprintf("--%s", ColorNameFlag))
 }
 
 // addColorFlags adds color related flags to the provided cmd.
 // It also adds hook to validate their values.
-// required parameter specifies whether color must be specified explicitly.
+// The 'required' parameter specifies whether color must be specified explicitly.
 // addColorFlags returns functions to retrieve current red, grenn, blue flags and target color values.
 func addColorFlags(cmd *cobra.Command, v *viper.Viper, required bool) (red, green, blue *byte, color **ite8291.Color) {
 
@@ -70,24 +73,29 @@ func addColorFlags(cmd *cobra.Command, v *viper.Viper, required bool) (red, gree
 	var name, rgb string
 	var col *ite8291.Color
 
-	cmd.PersistentFlags().Uint8Var(&r, colorRedFlag, redDefault, "Red atom of RGB color.")
-	cmd.PersistentFlags().Uint8Var(&g, colorGreenFlag, greenDefault, "Green atom of RGB color.")
-	cmd.PersistentFlags().Uint8Var(&b, colorBlueFlag, blueDefault, "Blue atom of RGB color.")
+	cmd.PersistentFlags().Uint8Var(&r, ColorRedFlag, RedDefault, "Red part of RGB color.")
+	cmd.PersistentFlags().Uint8Var(&g, ColorGreenFlag, GreenDefault, "Green part of RGB color.")
+	cmd.PersistentFlags().Uint8Var(&b, ColorBlueFlag, BlueDefault, "Blue part of RGB color.")
 
-	cmd.PersistentFlags().StringVar(&name, colorNameFlag, "", "Name of the color")
-	cmd.PersistentFlags().StringVar(&rgb, colorRGBFlag, "", "Color as RGB value")
+	cmd.PersistentFlags().StringVar(&name, ColorNameFlag, "",
+		fmt.Sprintf("Name of the color to use. One of color names configured via %q property in configuration file(s).",
+			NamedColorsProp))
+	cmd.PersistentFlags().StringVar(&rgb, ColorRGBFlag, "",
+		fmt.Sprintf("Color as RGB value in a one of the following formats %q",
+			ite8291.SupportedColorStringFormats))
 
-	cmd.MarkFlagsMutuallyExclusive(colorRGBFlag, colorNameFlag, colorRedFlag)
-	cmd.MarkFlagsMutuallyExclusive(colorRGBFlag, colorNameFlag, colorGreenFlag)
-	cmd.MarkFlagsMutuallyExclusive(colorRGBFlag, colorNameFlag, colorBlueFlag)
+	cmd.MarkFlagsMutuallyExclusive(ColorRGBFlag, ColorNameFlag, ColorRedFlag)
+	cmd.MarkFlagsMutuallyExclusive(ColorRGBFlag, ColorNameFlag, ColorGreenFlag)
+	cmd.MarkFlagsMutuallyExclusive(ColorRGBFlag, ColorNameFlag, ColorBlueFlag)
 	if required {
-		cmd.MarkFlagsOneRequired(colorNameFlag, colorRGBFlag,
-			colorRedFlag, colorGreenFlag, colorBlueFlag)
+		cmd.MarkFlagsOneRequired(ColorNameFlag, ColorRGBFlag,
+			ColorRedFlag, ColorGreenFlag, ColorBlueFlag)
 	}
 
 	addValidationHook(cmd, func() (err error) {
 
 		if len(name) > 0 {
+
 			if col, err = colorNameToColor(name, v); err != nil {
 				return err
 			}
@@ -96,9 +104,10 @@ func addColorFlags(cmd *cobra.Command, v *viper.Viper, required bool) (red, gree
 		}
 
 		if len(rgb) > 0 {
+
 			if col, err = ite8291.ParseColor(rgb); err != nil {
-				return fmt.Errorf("%w: color RGB %q: %w",
-					InvalidOptionValueError, rgb, err)
+				return fmt.Errorf("%w %q for %q: %w", InvalidOptionValueError, rgb,
+					fmt.Sprintf("--%s", ColorRGBFlag), err)
 			}
 		}
 
@@ -109,7 +118,7 @@ func addColorFlags(cmd *cobra.Command, v *viper.Viper, required bool) (red, gree
 }
 
 // AddColor adds color related flags to the provided cmd.
-// It also adds hook to validate their values. It ensures that the color is specified explicitly.
+// It also adds hook to validate their values. It ensures that the color is specified explicitly via flags.
 // AddColor returns function to retrieve current color value.
 func AddColor(cmd *cobra.Command, v *viper.Viper) (color func() *ite8291.Color) {
 
@@ -125,36 +134,38 @@ func AddColor(cmd *cobra.Command, v *viper.Viper) (color func() *ite8291.Color) 
 	return func() *ite8291.Color { return *col }
 }
 
-// AddSingleColor adds color related flags to the provided cmd.
-// It also adds hook to validate their values. If color is not specified explicitly,
-// it will be read from configuration. If color is neither specified nor configured
-// the default value will be used.
-// AddSingleColor returns function to retrieve current color value.
-func AddSingleColor(cmd *cobra.Command, v *viper.Viper) (color func() *ite8291.Color) {
+// AddSingleModeColor adds color related flags to the provided 'single-color-mode' cmd.
+// It also adds hook to validate their values. It uses either configured or default value
+// if color is not specified explicitly.
+// AddSingleModeColor returns function to retrieve current value of color for single-color-mode.
+func AddSingleModeColor(cmd *cobra.Command, v *viper.Viper) (color func() *ite8291.Color) {
 
 	r, g, b, col := addColorFlags(cmd, v, false)
 
 	addValidationHook(cmd, func() (err error) {
 		if *col == nil {
-			if cmd.Flag(colorRedFlag).Changed || cmd.Flag(colorGreenFlag).Changed || cmd.Flag(colorBlueFlag).Changed {
+			// no color via color name or rgb
+			if cmd.Flag(ColorRedFlag).Changed || cmd.Flag(ColorGreenFlag).Changed || cmd.Flag(ColorBlueFlag).Changed {
+				// color  via red, green, blue flags
 				*col = ite8291.NewColor(*r, *g, *b)
 				return nil
 			}
+			// try configured color
+			c := v.GetString(SingleColorProp)
+			if len(c) == 0 {
+				c = SingleColorDefault // no configured -> use default
+			}
 
-			c := v.GetString(singleColorProp)
-			if len(c) > 0 {
-				if *col, err = colorNameToColor(c, v); err == nil {
-					return nil
-				}
-
-				if *col, err = ite8291.ParseColor(c); err != nil {
-					return fmt.Errorf("%w: single color %q: %w",
-						InvalidOptionValueError, c, err)
-				}
+			// try as color name
+			if *col, err = colorNameToColor(c, v); err == nil {
 				return nil
 			}
 
-			*col, _ = ite8291.ParseColor(singleColorDefault)
+			// it must be rgb
+			if *col, err = ite8291.ParseColor(c); err != nil {
+				return fmt.Errorf("%w %q for configured single mode color: %w",
+					InvalidOptionValueError, c, err)
+			}
 		}
 
 		return nil

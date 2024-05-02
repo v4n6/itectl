@@ -6,28 +6,32 @@ import (
 	"slices"
 
 	"github.com/adrg/xdg"
-	"github.com/spf13/cast"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
 
 // viper configuration file properties
 const (
+	// ConfigName is name of configuration file(s) used by viper
 	ConfigName = "ite8291r3"
-
+	// ConfigType is type of configuration file(s) used by viper
 	ConfigType = "yaml"
 )
 
-// defaultModeProp is a viper config property name for default mode
-const defaultModeProp = "mode"
+const (
+	// defaultModeProp is viper config property name for implicit mode
+	defaultModeProp = "mode"
+	// ConfigFileFlag is name of the viper config file flag
+	ConfigFileFlag = "config"
+	// configurationWarning is warning about possibility that value can be retrieved from viper configuration
+	configurationWarning = "The default value can be overwritten by global and/or user configuration!"
+)
 
-// ConfigFileFlag is name of viper config file flag
-const ConfigFileFlag = "config"
-
-// InvalidOptionValueError is an error indicating that a provided option has an invalid value.
+// InvalidOptionValueError is an error indicating that a property has an invalid value.
 var InvalidOptionValueError = errors.New("invalid option value")
 
-// DefaultMode returns name of configured default mode without "-mode" suffix
+// DefaultMode returns name of configured implicit mode without "-mode" suffix
 func DefaultMode(v *viper.Viper) string {
 	return v.GetString(defaultModeProp)
 }
@@ -36,7 +40,7 @@ func DefaultMode(v *viper.Viper) string {
 func validateMinMaxUint8Value(name string, val, valMin, valMax uint8) error {
 
 	if valMax < val || val < valMin {
-		return fmt.Errorf("%w %q; expected [%d,%d] was %d", InvalidOptionValueError, name, valMin, valMax, val)
+		return fmt.Errorf("%w \"%d\" for %q; expected [%d,%d]", InvalidOptionValueError, val, name, valMin, valMax)
 	}
 
 	return nil
@@ -46,16 +50,16 @@ func validateMinMaxUint8Value(name string, val, valMin, valMax uint8) error {
 func validateMaxUint8Value(name string, val, valMax uint8) error {
 
 	if valMax < val {
-		return fmt.Errorf("%w %q; expected [%d,%d] was %d", InvalidOptionValueError, name, 0, valMax, val)
+		return fmt.Errorf("%w \"%d\" for %q; expected [%d,%d]", InvalidOptionValueError, val, name, 0, valMax)
 	}
 
 	return nil
 }
 
 // bindAndValidate sets PersistentPreRunE hook of the given cmd.
-// New hook calls the original PersistentPreRunE hook if it existed before.
+// New hook calls the original PersistentPreRunE hook first if it existed before.
 // It binds a flag specified via flagName with viper config property specified via configProp.
-// It also validates given property using provided via validate arg function, if given.
+// It also validates given property using provided via validate parameter function, if given.
 func bindAndValidate(cmd *cobra.Command, v *viper.Viper, flagName, configProp string, validate func() error) {
 
 	origin := cmd.PersistentPreRunE
@@ -69,7 +73,7 @@ func bindAndValidate(cmd *cobra.Command, v *viper.Viper, flagName, configProp st
 		}
 
 		if err := v.BindPFlag(configProp, cmd.Flag(flagName)); err != nil {
-			return err
+			return err // should never happen
 		}
 
 		if validate != nil {
@@ -81,8 +85,8 @@ func bindAndValidate(cmd *cobra.Command, v *viper.Viper, flagName, configProp st
 }
 
 // addValidationHook sets PersistentPreRunE hook of the given cmd.
-// New hook calls the original one if it existed before.
-// It validates command using provided via validate arg function.
+// New hook calls the original PersistentPreRunE hook first if it existed before.
+// It validates properties using provided via validate parameter function.
 func addValidationHook(cmd *cobra.Command, validate func() error) {
 
 	origin := cmd.PersistentPreRunE
@@ -99,23 +103,23 @@ func addValidationHook(cmd *cobra.Command, validate func() error) {
 	}
 }
 
-// ReadConfig initializes viper instance specified via v.
-// It reads configuration from specific config file if provided by the user
-// via flag and reports error if it doesn't exist or read error occurred.
-// If no flag provided, it reads and merges configuration first from global
-// config files from XDG directories and then from config file in user XDG
-// directory. In this case errors are printed as warnings and no error is reported.
-// No warning is printed if no default config file(s) found.
-func ReadConfig(cmd *cobra.Command, v *viper.Viper, args []string) error {
+// AddConfigFlag adds config flag to the given cmd.
+// config flag identifies configuration file to use instead of default.
+func AddConfigFlag(cmd *cobra.Command) {
+	cmd.PersistentFlags().String(ConfigFileFlag, "",
+		fmt.Sprintf("Configuration file to use instead of xdg config files [\"/etc/%[1]s.%[2]s\",\"~/.config/%[1]s.%[2]s\"]",
+			ConfigName, ConfigType))
+}
 
-	_ = cmd.Flags().Parse(args) // ignore errors
+// ReadConfig adds retrieved configuration to viper instance specified via v.
+// If cfgFile is provided, ReadConfig reads configuration from that file and merges it with given v viper.
+// It returns error if specified file does not exist or io error occurred.
+// If cfgFile is empty, ReadConfig retrieves configuration from default global/user XDG config files.
+// In this case all occurred errors are printed as warnings and no error is returned.
+// No warning is printed if default config file(s) not found.
+func ReadConfig(cmd *cobra.Command, v *viper.Viper, cfgFile string) error {
 
-	if cfgFlag := cmd.Flag(ConfigFileFlag); cfgFlag.Changed {
-		// Use config cfgFile provided via flag.
-		cfgFile, err := cast.ToStringE(cfgFlag.Value)
-		if err != nil {
-			return err
-		}
+	if len(cfgFile) > 0 {
 
 		if err := readInConfig(v, cfgFile, ""); err != nil {
 			return fmt.Errorf("error reading configuration file %q: %w", cfgFile, err)
@@ -128,10 +132,11 @@ func ReadConfig(cmd *cobra.Command, v *viper.Viper, args []string) error {
 	for _, dir := range slices.Concat(xdg.ConfigDirs, []string{xdg.ConfigHome}) {
 
 		if err := mergeConfig(cmd, v, dir); err != nil {
-			// print and ignore errors
-			fmt.Fprintf(cmd.ErrOrStderr(), "Warning: %v\n", err)
+			fmt.Fprintf(cmd.ErrOrStderr(), "Warning: %v\n", err) // print and ignore errors
 		}
 	}
+
+	v.AutomaticEnv() // read in environment variables that match
 
 	return nil
 }
@@ -143,16 +148,16 @@ func mergeConfig(cmd *cobra.Command, v *viper.Viper, dir string) error {
 
 	if err := readInConfig(v_, "", dir); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-			// return error if config file was found and error occured
-			return err
+			return err // return error if config file was found and error occured
 		}
 	}
 
 	return v.MergeConfigMap(v_.AllSettings())
 }
 
-// readInConfig reads configuration into v from config file specified via cfgFile, if provided.
-// It reads it from file in dir if cfgFile is set to default value.
+// readInConfig retrieves properties into viper instance specified via v
+// from config file specified via cfgFile, if provided.
+// It retrieves them from file in dir if cfgFile is not provided.
 func readInConfig(v *viper.Viper, cfgFile, dir string) error {
 
 	v.SetConfigType(ConfigType)
@@ -165,4 +170,21 @@ func readInConfig(v *viper.Viper, cfgFile, dir string) error {
 	}
 
 	return v.ReadInConfig()
+}
+
+// ConfigFile returns value of config flag.
+func ConfigFile(cmd *cobra.Command, flags []string) (cfgFile string, err error) {
+	fs := pflag.NewFlagSet("config", pflag.ContinueOnError)
+	fs.ParseErrorsWhitelist.UnknownFlags = true
+	fs.AddFlagSet(cmd.Flags())
+	fs.AddFlagSet(cmd.PersistentFlags())
+
+	_ = fs.Parse(flags) // ignore errors
+
+	cfgFlag := fs.Lookup(ConfigFileFlag)
+	if cfgFlag == nil {
+		return "", nil
+	}
+
+	return fs.GetString(ConfigFileFlag)
 }

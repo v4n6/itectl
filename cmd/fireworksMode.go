@@ -24,34 +24,33 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/v4n6/ite8291r3tool/params"
-	"github.com/v4n6/ite8291r3tool/pkg/ite8291"
+	"github.com/v4n6/itectl/params"
+	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
+// fireworksModeDescription - fireworks-mode command description
+const fireworksModeDescription = "Set keyboard backlight to 'fireworks' mode."
+
 // newFireworksModeCmd creates, initializes and returns command
-// to set keyboard backlight to fireworks mode.
-func newFireworksModeCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
+// to set keyboard backlight to 'fireworks' mode.
+func newFireworksModeCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
 	var speed func() byte
 	var brightness func() byte
 	var colorNum func() byte
 	var reactive func() bool
 	var save func() bool
+	var optionallyResetColors ite8291Call
 
-	// fireworksModeCmd represents the fireworks-mode command
-	var fireworksModeCmd = &cobra.Command{
+	fireworksModeCmd := &cobra.Command{
 		Use:   "fireworks-mode",
-		Short: "Set keyboard backlight to 'fireworks' mode.",
-		Long: `Set keyboard backlight to 'fireworks' mode.
-  Brightness of the mode can be provided by --brightness (-b) option.
-  Speed of the mode's animation can be provided by --speed (-s) option.
-  The predefined color used by the mode can be specified by its number provided by --color-num options.
-  Color number '0' indicates black (none) color. Color number '8' indicates random color.
-  If --reactive is provided the backlight reacts to user input.
-  If --save is provided the mode is saved in controller.`,
+		Short: fireworksModeDescription,
+		Long:  fireworksModeDescription,
 		RunE: func(cmd *cobra.Command, args []string) error {
-
 			return call(func(ctl *ite8291.Controller) error {
+				if err := optionallyResetColors(ctl); err != nil {
+					return err
+				}
 				return ctl.SetFireworksMode(speed(), brightness(), colorNum(), reactive(), save())
 			})
 		},
@@ -62,6 +61,7 @@ func newFireworksModeCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
 	colorNum = params.AddColorNum(fireworksModeCmd, v)
 	reactive = params.AddReactive(fireworksModeCmd, v)
 	save = params.AddSave(fireworksModeCmd, v)
+	optionallyResetColors = params.AddReset(fireworksModeCmd, v)
 
 	return fireworksModeCmd
 }

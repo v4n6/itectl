@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-// ite8291r3 controller commands
+// ite8291r3 controller command
 const (
 	GetEffectCommand          = 0x88
 	SetEffectCommand          = 0x8
@@ -20,12 +20,12 @@ const (
 	SetOffOp    = 0x1
 )
 
-// ite8291r3 states
+// ite8291r3 state
 const (
 	OffState = 0x1
 )
 
-// ite8291r3 effect types
+// ite8291r3 effect type
 const (
 	BreathingEffect = 0x2
 	WaveEffect      = 0x3
@@ -39,10 +39,10 @@ const (
 	UserEffect      = 0x33
 )
 
-// Direction represents direction of ite8291r3 effects
+// Direction provides type for direction of ite8291r3 effects
 type Direction byte
 
-// ite8291r3 effect directions
+// ite8291r3 effect direction
 const (
 	DirectionNone  Direction = 0x0
 	DirectionRight Direction = 0x1
@@ -51,7 +51,7 @@ const (
 	DirectionDown  Direction = 0x4
 )
 
-// ite8291r3 controller parameters boundaries
+// ite8291r3 controller parameters boundary
 const (
 	BrightnessMaxValue = 50
 
@@ -60,11 +60,11 @@ const (
 	ColorNumMinValue = 0x0
 	ColorNumMaxValue = 0x8
 
-	AssignableColorNumMinValue = 0x1
-	AssignableColorNumMaxValue = 0x7
+	CustomColorNumMinValue = 0x1
+	CustomColorNumMaxValue = 0x7
 )
 
-// special colors
+// special color number
 const (
 	ColorNone   = 0x0
 	ColorRandom = 0x8
@@ -76,7 +76,7 @@ const (
 	ColumnsNumber = 21
 )
 
-// auxiliary ite8291r3 keyboard buffer constants
+// auxiliary ite8291r3 keyboard buffer constant
 const (
 	rowBufferLength = 3*ColumnsNumber + 2
 
@@ -118,7 +118,7 @@ func (c *Controller) Close() error {
 // ControlSend sends data to ite8291r3 controller
 func (c *Controller) ControlSend(data []byte) error {
 
-	_, err := c.dev.ControlTransfer(sendControlRequestType,
+	_, err := c.dev.ControlTransfer(SendControlRequestType,
 		0x009, // bRequest (HID set_report)
 		0x300, // wValue (HID feature)
 		0x001, // wIndex
@@ -131,7 +131,7 @@ func (c *Controller) ControlSend(data []byte) error {
 
 // ControlSend receives data from ite8291r3 controller
 func (c *Controller) controlReceive(data []byte) error {
-	_, err := c.dev.ControlTransfer(rcvControlRequestType,
+	_, err := c.dev.ControlTransfer(ReceiveControlRequestType,
 		0x001, // bRequest (HID set_report)
 		0x300, // wValue (HID feature)
 		0x001, // wIndex
@@ -350,7 +350,7 @@ func (c *Controller) SetColor(colorNum byte, color *Color) error {
 // SetColors sets predefined colors to the provided colors
 func (c *Controller) SetColors(colors []*Color) error {
 
-	for i, col := range colors[:AssignableColorNumMaxValue-AssignableColorNumMinValue+1] {
+	for i, col := range colors[:CustomColorNumMaxValue-CustomColorNumMinValue+1] {
 
 		if err := c.ControlSend([]byte{SetColorCommand, 0, byte(i + 1), col.Red, col.Green, col.Blue}); err != nil {
 			return err

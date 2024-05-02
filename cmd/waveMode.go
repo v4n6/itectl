@@ -24,31 +24,32 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/v4n6/ite8291r3tool/params"
-	"github.com/v4n6/ite8291r3tool/pkg/ite8291"
+	"github.com/v4n6/itectl/params"
+	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
+// waveModeDescription - wave-mode command description
+const waveModeDescription = "Set keyboard backlight to 'wave' mode."
+
 // newWaveModeCmd creates, initializes and returns command
-// to set keyboard backlight to wave mode.
-func newWaveModeCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
+// to set keyboard backlight to 'wave' mode.
+func newWaveModeCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
 	var speed func() byte
 	var brightness func() byte
 	var direction func() ite8291.Direction
 	var save func() bool
+	var optionallyResetColors ite8291Call
 
-	// waveModeCmd represents the wave-mode command
 	var waveModeCmd = &cobra.Command{
 		Use:   "wave-mode",
-		Short: "Set keyboard backlight to 'wave' mode.",
-		Long: `Set keyboard backlight to 'wave' mode.
-	Brightness of the mode can be provided by --brightness (-b) option.
-  Speed of the mode's animation can be provided by --speed (-s) option.
-  Direction of the wave can be specified by --direction (-d) option
-  If --save is provided the mode is saved in controller.`,
-
+		Short: waveModeDescription,
+		Long:  waveModeDescription,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return call(func(ctl *ite8291.Controller) error {
+				if err := optionallyResetColors(ctl); err != nil {
+					return err
+				}
 				return ctl.SetWaveMode(speed(), brightness(), direction(), save())
 			})
 		},
@@ -58,6 +59,7 @@ func newWaveModeCmd(v *viper.Viper, call ite8291r3Ctl) *cobra.Command {
 	brightness = params.AddBrightness(waveModeCmd, v)
 	direction = params.AddDirection(waveModeCmd, v)
 	save = params.AddSave(waveModeCmd, v)
+	optionallyResetColors = params.AddReset(waveModeCmd, v)
 
 	return waveModeCmd
 }
