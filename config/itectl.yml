@@ -1,4 +1,112 @@
 ---
+# default mode of the keyboard backlight to use if no command specified
+# The value must be a mode name without the "-mode" suffix.
+# e.g. "rainbow" for "rainbow-mode" command.
+# There is no default value.
+# --------------------------------
+# mode: wave
+
+# brightness of the keyboard backlight
+# Minimum value 0. Maximum value 50.
+# Default value: 25
+# --------------------------------
+brightness: 25
+
+# number of the predfined color of keyboard backlight to use by effect
+# Minimum value 0. Maximum value 8.
+# 0 - no color, 1-7 - customizable colors, 8 - random color
+# Default value: 8
+# --------------------------------
+colorNum: 8
+
+# speed of the keyboard backlight effect
+# Minimum value - 0. Maximum value - 10
+# 0 - slowest effect speed, 10 - fastest effect speed
+# Default value: 5
+# --------------------------------
+speed: 5
+
+# if set to true, makes the keyboard backlight effect reactive
+# i.e. effect reacts to key presses.
+# Default value: false
+# --------------------------------
+reactive: false
+
+# if set to true, resets the controller customizable predefined colors
+# to their corresponding configured/default values before setting the effect.
+# used only by "-mode" commands.
+# Default value: false
+# --------------------------------
+reset: true
+
+# color of the keyboard backlight to use by single color mode.
+# must be either a name of a configured named color or a color
+# in one of the forms ["0xHHHHHH" "#xHHHHHH" "#HHHHHH" "HHHHHH" "#HHH" "HHH"]
+# Default value: #FFFFFF
+# --------------------------------
+singleModeColor: "#FFFFFF"
+
+# direction of the  keyboard backlight effect.
+# Following values are supported ["none" "left" "right" "up" "down"]
+# Default value: right
+# --------------------------------
+direction: right
+
+# if set to true, instructs the ite8291r3 controller to save its state
+# Default value: false
+# --------------------------------
+save: false
+
+# keyboard backlight customizable predefined colors used if reset is set to true
+# Default values are:
+#   color1: "#FFFFFF"
+#   color2: "#FF0000"
+#   color3: "#FFFF00"
+#   color4: "#00FF00"
+#   color5: "#0000FF"
+#   color6: "#00FFFF"
+#   color7: "#FF00FF"
+# --------------------------------
+predefinedColors:
+  color1: "#FFFFFF"
+  color2: "#FF0000"
+  color3: "#FFFF00"
+  color4: "#00FF00"
+  color5: "#0000FF"
+  color6: "#00FFFF"
+  color7: "#FF00FF"
+
+# poll for ite8291r3 usb device of none was found.
+# It's intended to be used at boot after modprobe
+# when the device is not available immediately.
+# If timeout is set to 0 (default value), the polling is suppressed.
+# --------------------------------
+poll:
+  # time interval to wait between controller polls
+  # The value is ignored if timeout is 0
+  # Default value: 200ms
+  interval: "200ms"
+  # maximum time to wait for controller to be available.
+  # If set to 0, either a discovered device will be used or
+  # itectl will exit immediately with non zero exit code
+  # Default value: 0
+  timeout: 0
+
+# ite8291r3 usb device to use.
+# If not specified the first found ite8291r3 device will be used.
+# The property is used to suppress automatic device discovery.
+# Both bus and address must be specified.
+# There is no default value.
+# --------------------------------
+# device:
+#   bus: 0
+#   address: 0
+
+# configured colors
+# makes it possible to use the name of the color instead
+# of its RGB value in several commands.
+# There is no default value.
+# --------------------------------
 namedColors:
   absolute_zero: "#0048BA"
   acid_green: "#B0BF1A"

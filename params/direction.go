@@ -9,7 +9,7 @@ import (
 )
 
 // DirectionDefault is default value of direction configuration property.
-const DirectionDefault string = "none"
+const DirectionDefault string = "right"
 
 const (
 	// DirectionProp is name of direction flag and configuration property.

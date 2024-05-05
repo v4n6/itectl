@@ -14,7 +14,7 @@ import (
 // viper configuration file properties
 const (
 	// ConfigName is name of configuration file(s) used by viper
-	ConfigName = "ite8291r3"
+	ConfigName = "itectl"
 	// ConfigType is type of configuration file(s) used by viper
 	ConfigType = "yaml"
 )
