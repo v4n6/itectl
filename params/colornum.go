@@ -51,6 +51,10 @@ func AddCustomColorNum(cmd *cobra.Command, v *viper.Viper) (assignableColorNum f
 		fmt.Sprintf("Number of the predfined color of keyboard backlight to set; min value %d, max value %d.",
 			ite8291.CustomColorNumMinValue, ite8291.CustomColorNumMaxValue))
 	addValidationHook(cmd, func() error {
+		if !cmd.Flag(ColorNumFlag).Changed {
+			return nil
+		}
+
 		return validateMinMaxUint8Value(fmt.Sprintf("-%s, --%s", ColorNumShortFlag, ColorNumFlag), customColorNum,
 			ite8291.CustomColorNumMinValue, ite8291.CustomColorNumMaxValue)
 	})
