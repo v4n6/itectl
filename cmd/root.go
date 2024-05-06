@@ -52,6 +52,9 @@ func ExecuteCmd(args []string, output, errOut io.Writer,
 
 	v := viper.New()
 	rootCmd := newRootCmd(v, find) // root command
+	rootCmd.InitDefaultCompletionCmd()
+	rootCmd.InitDefaultHelpCmd()
+	rootCmd.InitDefaultHelpFlag()
 
 	cmd, flags, err := rootCmd.Traverse(args) // get sub-command
 	if err != nil {
@@ -69,7 +72,7 @@ func ExecuteCmd(args []string, output, errOut io.Writer,
 
 	v.AutomaticEnv() // read in environment variables that match
 
-	if cmd.Use == rootCmd.Use {
+	if cmd.Use == rootCmd.Use && !cmd.Flag("help").Changed {
 		// no sub-command provided
 		defaultMode := params.DefaultMode(v) // configured default mode
 		if len(defaultMode) > 0 {
@@ -122,10 +125,11 @@ func findIteDevice(useDevice bool, bus, address int,
 func newRootCmd(v *viper.Viper, find findDevice) *cobra.Command {
 
 	var rootCmd = &cobra.Command{
-		Use:              "itectl",
-		Short:            "Control ite8291r3 keyboard backlight",
-		Long:             `Control ite8291r3 keyboard backlight`,
-		TraverseChildren: true,
+		Use:               "itectl",
+		Short:             "Control ITE 8291 keyboard backlight",
+		Long:              `Control ITE 8291 keyboard backlight`,
+		TraverseChildren:  true,
+		CompletionOptions: cobra.CompletionOptions{HiddenDefaultCmd: true},
 	}
 
 	// config flag
