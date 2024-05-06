@@ -27,4 +27,4 @@ go.work
 coverprofile*
 
 # built binary
-itectl
+/itectl

@@ -1,0 +1,22 @@
+#!/bin/ash
+
+build() {
+
+    add_module "ite_8291"
+
+    add_binary "itectl"
+
+    add_file "/etc/xdg/itectl.yml"
+
+    add_runscript
+}
+
+help() {
+    cat <<HELPEOF
+
+Adds ite8291r3 tuxedo drivers to the initramfs image.
+It allows to switch on the keyboard backlight before the OS is completely loaded.
+It makes it easier to enter passwords or any other information required at boot time.
+
+HELPEOF
+}
