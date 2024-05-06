@@ -122,7 +122,7 @@ func findIteDevice(useDevice bool, bus, address int,
 func newRootCmd(v *viper.Viper, find findDevice) *cobra.Command {
 
 	var rootCmd = &cobra.Command{
-		Use:              "ite8291r3ctl",
+		Use:              "itectl",
 		Short:            "Control ite8291r3 keyboard backlight",
 		Long:             `Control ite8291r3 keyboard backlight`,
 		TraverseChildren: true,
