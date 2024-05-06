@@ -4,7 +4,7 @@
 # e.g. "rainbow" for "rainbow-mode" command.
 # There is no default value.
 # --------------------------------
-# mode: wave
+mode: rainbow
 
 # brightness of the keyboard backlight
 # Minimum value 0. Maximum value 50.
@@ -90,7 +90,7 @@ poll:
   # If set to 0, either a discovered device will be used or
   # itectl will exit immediately with non zero exit code
   # Default value: 0
-  timeout: 0
+  timeout: "500ms"
 
 # ite8291r3 usb device to use.
 # If not specified the first found ite8291r3 device will be used.
