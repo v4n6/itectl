@@ -4,6 +4,6 @@ run_hook() {
     msg ':: Loading ite_8291 module...'
     modprobe -a ite_8291 >/dev/null 2>&1
 
-    msg ':: Setting keyboard backlight to default mode...'
+    msg ':: Setting ITE 8291 keyboard backlight...'
     /usr/bin/itectl
 }

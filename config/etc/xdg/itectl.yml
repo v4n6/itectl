@@ -52,7 +52,7 @@ singleModeColor: "#FFFFFF"
 # --------------------------------
 direction: right
 
-# if set to true, instructs the ite8291r3 controller to save its state
+# if set to true, instructs the ITE 8291 controller to save its state
 # Default value: false
 # --------------------------------
 save: false
@@ -76,7 +76,7 @@ predefinedColors:
   color6: "#00FFFF"
   color7: "#FF00FF"
 
-# poll for ite8291r3 usb device of none was found.
+# poll for ITE 8291 device of none was found.
 # It's intended to be used at boot after modprobe
 # when the device is not available immediately.
 # If timeout is set to 0 (default value), the polling is suppressed.
@@ -92,8 +92,8 @@ poll:
   # Default value: 0
   timeout: "500ms"
 
-# ite8291r3 usb device to use.
-# If not specified the first found ite8291r3 device will be used.
+# ITE 8291 usb device to use.
+# If not specified the first found ITE 8291 device will be used.
 # The property is used to suppress automatic device discovery.
 # Both bus and address must be specified.
 # There is no default value.
