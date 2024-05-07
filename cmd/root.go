@@ -72,7 +72,13 @@ func ExecuteCmd(args []string, output, errOut io.Writer,
 
 	v.AutomaticEnv() // read in environment variables that match
 
-	if cmd.Use == rootCmd.Use && !cmd.Flag("help").Changed {
+	if cmd.Use == rootCmd.Use &&
+		!cmd.Flag("help").Changed &&
+		!slices.ContainsFunc(flags, func(s string) bool {
+			return s == cobra.ShellCompRequestCmd ||
+				s == cobra.ShellCompNoDescRequestCmd
+		}) {
+
 		// no sub-command provided
 		defaultMode := params.DefaultMode(v) // configured default mode
 		if len(defaultMode) > 0 {
