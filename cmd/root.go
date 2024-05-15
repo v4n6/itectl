@@ -37,7 +37,7 @@ import (
 // Execute invokes the application.
 func Execute() {
 
-	cobra.CheckErr(ExecuteCmd(os.Args[1:], os.Stdout, os.Stderr, findIteDevice, params.ReadConfig))
+	_ = ExecuteCmd(os.Args[1:], os.Stdout, os.Stderr, findIteDevice, params.ReadConfig)
 }
 
 // ExecuteCmd invokes the command provided by args or sets keyboard backlight to a configured mode.
@@ -58,12 +58,12 @@ func ExecuteCmd(args []string, output, errOut io.Writer,
 
 	cmd, flags, err := rootCmd.Traverse(args) // get sub-command
 	if err != nil {
-		return err
+		cobra.CheckErr(err)
 	}
 
 	cfgFile, err := params.ConfigFile(rootCmd, flags)
 	if err != nil {
-		return err
+		cobra.CheckErr(err)
 	}
 
 	if err = readConf(rootCmd, v, cfgFile); err != nil {
