@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/adrg/xdg"
 	"github.com/spf13/cobra"
@@ -136,6 +137,8 @@ func ReadConfig(cmd *cobra.Command, v *viper.Viper, cfgFile string) error {
 		}
 	}
 
+	v.SetEnvPrefix("ITECTL")
+	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	v.AutomaticEnv() // read in environment variables that match
 
 	return nil

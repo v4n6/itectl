@@ -70,8 +70,6 @@ func ExecuteCmd(args []string, output, errOut io.Writer,
 		return err
 	}
 
-	v.AutomaticEnv() // read in environment variables that match
-
 	if cmd.Use == rootCmd.Use &&
 		!cmd.Flag("help").Changed &&
 		!slices.ContainsFunc(flags, func(s string) bool {
