@@ -170,9 +170,9 @@ func newRootCmd(v *viper.Viper, find findDevice) *cobra.Command {
 	rootCmd.AddCommand(newRippleModeCmd(v, exec))
 	rootCmd.AddCommand(newSingleColorModeCmd(v, exec))
 	rootCmd.AddCommand(newWaveModeCmd(v, exec))
-	rootCmd.AddCommand(newGetBrightnessCmd(v, exec))
+	rootCmd.AddCommand(newBrightnessCmd(v, exec))
 	rootCmd.AddCommand(newSetBrightnessCmd(v, exec))
-	rootCmd.AddCommand(newGetFirmwareVersionCmd(v, exec))
+	rootCmd.AddCommand(newFirmwareVersionCmd(v, exec))
 	rootCmd.AddCommand(newStateCmd(v, exec))
 	rootCmd.AddCommand(newSetColorCmd(v, exec))
 

@@ -29,17 +29,17 @@ import (
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
-// getBrightnessDescription - get-brightness command description
-const getBrightnessDescription = "Retrieve and print current brightness of the keyboard backlight."
+// brightnessDescription - brightness command description
+const brightnessDescription = "Retrieve and print current brightness of the keyboard backlight."
 
-// newGetBrightnessCmd creates, initializes and returns command
+// newBrightnessCmd creates, initializes and returns command
 // to retrieve and print keyboard backlight brightness.
-func newGetBrightnessCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
+func newBrightnessCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
 	return &cobra.Command{
-		Use:   "get-brightness",
-		Short: getBrightnessDescription,
-		Long:  getBrightnessDescription,
+		Use:   "brightness",
+		Short: brightnessDescription,
+		Long:  brightnessDescription,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return call(func(ctl *ite8291.Controller) error {
 				brightness, err := ctl.GetBrightness()

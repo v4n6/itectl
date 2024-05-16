@@ -195,12 +195,12 @@ var _ = Describe("cmd package", func() {
 						RequiredBrightness(brightnessAll...).entries(),
 				)
 
-				DescribeTableSubtree("get-brightness",
+				DescribeTableSubtree("brightness",
 					func(ex *execT) {
 						var brightness int
 
 						BeforeEach(func() {
-							brightness, subCmd = r.Intn(ite8291.BrightnessMaxValue), "get-brightness"
+							brightness, subCmd = r.Intn(ite8291.BrightnessMaxValue), "brightness"
 							cmdArgs = ex.genArgs(nil, defs, r)
 
 							dev.ctlChangedData = [][]byte{nil, []byte{8, 0, 0, 0, byte(brightness), 0, 0, 0}}
@@ -231,13 +231,13 @@ var _ = Describe("cmd package", func() {
 						RequiredDeviceAddress(deviceAddressAll...).entries(),
 				)
 
-				DescribeTableSubtree("get-firmware-version",
+				DescribeTableSubtree("firmware-version",
 					func(ex *execT) {
 
 						var version []byte
 
 						BeforeEach(func() {
-							subCmd, cmdArgs = "get-firmware-version", ex.genArgs(nil, defs, r)
+							subCmd, cmdArgs = "firmware-version", ex.genArgs(nil, defs, r)
 
 							version = []byte{byte(r.Intn(255)), byte(r.Intn(255)), byte(r.Intn(255)), byte(r.Intn(255))}
 
@@ -1017,8 +1017,8 @@ var _ = Describe("cmd package", func() {
 
 					EntryDescription("%q"),
 
-					Entry(nil, "get-brightness"),
-					Entry(nil, "get-firmware-version"),
+					Entry(nil, "brightness"),
+					Entry(nil, "firmware-version"),
 					Entry(nil, "state"),
 
 					Entry(nil, "aurora-mode"),
@@ -1054,8 +1054,8 @@ var _ = Describe("cmd package", func() {
 
 					EntryDescription("%q"),
 
-					Entry(nil, "get-brightness"),
-					Entry(nil, "get-firmware-version"),
+					Entry(nil, "brightness"),
+					Entry(nil, "firmware-version"),
 					Entry(nil, "state"),
 
 					Entry(nil, "aurora-mode"),
@@ -1091,8 +1091,8 @@ var _ = Describe("cmd package", func() {
 
 					EntryDescription("%q"),
 
-					Entry(nil, "get-brightness"),
-					Entry(nil, "get-firmware-version"),
+					Entry(nil, "brightness"),
+					Entry(nil, "firmware-version"),
 					Entry(nil, "state"),
 
 					Entry(nil, "aurora-mode"),
@@ -1130,8 +1130,8 @@ var _ = Describe("cmd package", func() {
 
 					EntryDescription("%q"),
 
-					Entry(nil, "get-brightness"),
-					Entry(nil, "get-firmware-version"),
+					Entry(nil, "brightness"),
+					Entry(nil, "firmware-version"),
 					Entry(nil, "state"),
 
 					Entry(nil, "aurora-mode"),
@@ -1169,8 +1169,8 @@ var _ = Describe("cmd package", func() {
 
 					EntryDescription("%q"),
 
-					Entry(nil, "get-brightness"),
-					Entry(nil, "get-firmware-version"),
+					Entry(nil, "brightness"),
+					Entry(nil, "firmware-version"),
 					Entry(nil, "state"),
 
 					Entry(nil, "aurora-mode"),
@@ -1475,8 +1475,8 @@ var _ = Describe("cmd package", func() {
 			Entry(nil, 1, "aurora-mode"),
 			Entry(nil, 1, "breath-mode"),
 			Entry(nil, 1, "fireworks-mode"),
-			Entry(nil, 1, "get-brightness"),
-			Entry(nil, 1, "get-firmware-version"),
+			Entry(nil, 1, "brightness"),
+			Entry(nil, 1, "firmware-version"),
 			Entry(nil, 1, "marquee-mode"),
 			Entry(nil, 1, "off-mode"),
 			Entry(nil, 1, "rainbow-mode"),
@@ -1501,8 +1501,8 @@ var _ = Describe("cmd package", func() {
 			Entry(nil, 1, "single-color-mode", "--reset"),
 			Entry(nil, 1, "wave-mode", "--reset"),
 
-			Entry(nil, 2, "get-brightness"),
-			Entry(nil, 2, "get-firmware-version"),
+			Entry(nil, 2, "brightness"),
+			Entry(nil, 2, "firmware-version"),
 			Entry(nil, 2, "single-color-mode"),
 			Entry(nil, 2, "state"),
 
@@ -1602,8 +1602,8 @@ var _ = Describe("cmd package", func() {
 			Entry(nil, "aurora-mode"),
 			Entry(nil, "breath-mode"),
 			Entry(nil, "fireworks-mode"),
-			Entry(nil, "get-brightness"),
-			Entry(nil, "get-firmware-version"),
+			Entry(nil, "brightness"),
+			Entry(nil, "firmware-version"),
 			Entry(nil, "marquee-mode"),
 			Entry(nil, "off-mode"),
 			Entry(nil, "rainbow-mode"),
@@ -1644,8 +1644,8 @@ var _ = Describe("cmd package", func() {
 			Entry(nil, "aurora-mode"),
 			Entry(nil, "breath-mode"),
 			Entry(nil, "fireworks-mode"),
-			Entry(nil, "get-brightness"),
-			Entry(nil, "get-firmware-version"),
+			Entry(nil, "brightness"),
+			Entry(nil, "firmware-version"),
 			Entry(nil, "marquee-mode"),
 			Entry(nil, "off-mode"),
 			Entry(nil, "rainbow-mode"),

@@ -29,17 +29,17 @@ import (
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
-// getFirmwareVersionDescription - get-firmware-version command description
-const getFirmwareVersionDescription = "Retrieve and print firmware version of the keyboard backlight controller."
+// firmwareVersionDescription - firmware-version command description
+const firmwareVersionDescription = "Retrieve and print firmware version of the keyboard backlight controller."
 
-// newGetFirmwareVersionCmd creates, initializes and returns command
+// newFirmwareVersionCmd creates, initializes and returns command
 // to retrieve and print keyboard backlight controller firmware version.
-func newGetFirmwareVersionCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
+func newFirmwareVersionCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
 	return &cobra.Command{
-		Use:   "get-firmware-version",
-		Short: getFirmwareVersionDescription,
-		Long:  getFirmwareVersionDescription,
+		Use:   "firmware-version",
+		Short: firmwareVersionDescription,
+		Long:  firmwareVersionDescription,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return call(func(ctl *ite8291.Controller) error {
 				ver, err := ctl.GetFirmwareVersion()
