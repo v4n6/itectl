@@ -1149,7 +1149,7 @@ var _ = Describe("cmd package", func() {
 			},
 			newExecs().
 				DeviceBus("bus", "11bus", "as2").
-				RequiredDeviceAddress(deviceAddressAll...).entries(),
+				RequiredDeviceAddress("1", randomLabel, "255").entries(),
 		)
 
 		DescribeTableSubtree("device-address",
@@ -1187,7 +1187,7 @@ var _ = Describe("cmd package", func() {
 				)
 			},
 			newExecs().
-				RequiredDeviceBus(deviceBusAll...).
+				RequiredDeviceBus("1", randomLabel, "255").
 				DeviceAddress("1a", "x010", "address", "a1").entries(),
 		)
 

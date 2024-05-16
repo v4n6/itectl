@@ -31,37 +31,39 @@ const (
 // and to validate device properties. It ensures that either
 // both device bus and device address properties are not set, or both are set.
 // It returns functions to retrieve current useDevice, deviceBus and deviceAddress values.
-func AddDevice(cmd *cobra.Command, v *viper.Viper) (useDevice func() bool, deviceBus, deviceAddress func() int) {
+func AddDevice(cmd *cobra.Command, v *viper.Viper) (useDevice func() bool,
+	deviceBus, deviceAddress func() int) {
 
 	var useDev bool
 
-	cmd.PersistentFlags().Int(DeviceBusFlag, DeviceBusDefault,
+	cmd.PersistentFlags().Uint(DeviceBusFlag, DeviceBusDefault,
 		fmt.Sprintf("Bus number of the keyboard backlight device. %s", configurationWarning))
 	bindAndValidate(cmd, v, DeviceBusFlag, deviceBusProp, nil)
-	cmd.PersistentFlags().Int(DeviceAddressFlag, DeviceAddressDefault,
+	cmd.PersistentFlags().Uint(DeviceAddressFlag, DeviceAddressDefault,
 		fmt.Sprintf("Address of the keyboard backlight device. %s", configurationWarning))
 	bindAndValidate(cmd, v, DeviceAddressFlag, deviceAddressProp, nil)
 
 	addValidationHook(cmd, func() error {
 
-		if !(v.IsSet(deviceBusProp) || cmd.Flag(DeviceBusFlag).Changed) &&
-			!(v.IsSet(deviceAddressProp) || cmd.Flag(DeviceAddressFlag).Changed) {
+		bus, address := v.GetUint(deviceBusProp), v.GetUint(deviceAddressProp)
+
+		if bus > 0 && address > 0 {
+			useDev = true
+			return nil // device is set
+		}
+
+		if bus == 0 {
+			if address > 0 {
+				return fmt.Errorf("%w device bus number missing for \"--%s\" (either configured or specified explicitly)",
+					InvalidOptionValueError, DeviceBusFlag)
+			}
+
 			useDev = false
 			return nil // device is not set
 		}
 
-		if v.IsSet(deviceBusProp) || cmd.Flag(DeviceBusFlag).Changed {
-			if !(v.IsSet(deviceAddressProp) || cmd.Flag(DeviceAddressFlag).Changed) {
-				return fmt.Errorf("%w device address missing for \"--%s\" (either configured or specified explicitly)",
-					InvalidOptionValueError, DeviceAddressFlag)
-			}
-		} else if v.IsSet(deviceAddressProp) || cmd.Flag(DeviceAddressFlag).Changed {
-			return fmt.Errorf("%w device bus number missing for \"--%s\" (either configured or specified explicitly)",
-				InvalidOptionValueError, DeviceBusFlag)
-		}
-
-		useDev = true
-		return nil
+		return fmt.Errorf("%w device address missing for \"--%s\" (either configured or specified explicitly)",
+			InvalidOptionValueError, DeviceAddressFlag)
 	})
 
 	return func() bool { return useDev },

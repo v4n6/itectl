@@ -94,8 +94,8 @@ var (
 	pollIntervalAll = []string{"1µs", "1s", "1m"}
 	pollTimeoutAll  = []string{"20m", "10m", "1h"}
 
-	deviceBusAll     = []string{"0", randomLabel, "10000"}
-	deviceAddressAll = []string{"0", randomLabel, "20000"}
+	deviceBusAll     = []string{"0", randomLabel, "255"}
+	deviceAddressAll = []string{"0", randomLabel, "255"}
 
 	configFileAll = []string{"", randomLabel}
 )
@@ -240,10 +240,10 @@ func (e *execT) genArgs(args []string, conf *defaultsT, r *rand.Rand) []string {
 	args = e.genFlagArgs(args, e.pollTimeout, nil)
 
 	args = e.genFlagArgs(args, e.deviceBus, func() string {
-		return strconv.Itoa(r.Intn(1000))
+		return strconv.Itoa(1 + r.Intn(256))
 	})
 	args = e.genFlagArgs(args, e.deviceAddress, func() string {
-		return strconv.Itoa(r.Intn(1000))
+		return strconv.Itoa(1 + r.Intn(256))
 	})
 
 	args = e.genFlagArgs(args, e.configFile, func() string {
@@ -537,7 +537,7 @@ func (e *execT) DeviceAddress() int {
 }
 
 func (e *execT) Device() bool {
-	return e.DeviceBus() >= 0 && e.DeviceAddress() >= 0
+	return e.DeviceBus() > 0 && e.DeviceAddress() > 0
 }
 
 func (e *execT) PredefinedColors() []string {
