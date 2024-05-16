@@ -46,7 +46,7 @@ func newRippleModeCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 		Use:   "ripple-mode",
 		Short: rippleModeDescription,
 		Long:  rippleModeDescription,
-
+		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return call(func(ctl *ite8291.Controller) error {
 				if err := optionallyResetColors(ctl); err != nil {

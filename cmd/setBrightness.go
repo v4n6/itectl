@@ -41,6 +41,7 @@ func newSetBrightnessCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 		Use:   "set-brightness",
 		Short: setBrightnessDescription,
 		Long:  setBrightnessDescription,
+		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return call(func(ctl *ite8291.Controller) error {
 				return ctl.SetBrightness(brightness())

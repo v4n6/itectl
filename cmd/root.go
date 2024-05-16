@@ -133,6 +133,7 @@ func newRootCmd(v *viper.Viper, find findDevice) *cobra.Command {
 		Short:             "Control ITE 8291 keyboard backlight",
 		Long:              `Control ITE 8291 keyboard backlight`,
 		TraverseChildren:  true,
+		Args:              cobra.NoArgs,
 		CompletionOptions: cobra.CompletionOptions{HiddenDefaultCmd: true},
 	}
 

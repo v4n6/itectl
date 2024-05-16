@@ -61,6 +61,7 @@ It can be set to either a color name or an rgb directly.`,
 			params.ColorRGBFlag, ite8291.SupportedColorStringFormats,
 			params.ColorRedFlag, params.ColorGreenFlag, params.ColorBlueFlag,
 			params.SingleColorProp),
+		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return call(func(ctl *ite8291.Controller) error {
 				if err := optionallyResetColors(ctl); err != nil {
