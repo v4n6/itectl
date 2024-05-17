@@ -174,8 +174,6 @@ cd ./itectl-aur
 makepkg -fi
 ```
 
-</code>
-
 ### Manual installation
 
 You can test the project using the `go` tool
