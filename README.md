@@ -1,4 +1,4 @@
-# itectl - yet another tool for managing ITE 8291r3 keyboard backlight controller
+# itectl - yet another tool to manage ITE 8291r3 keyboard backlight
 
 ## Description
 
@@ -11,11 +11,11 @@ user input or be static, etc.
 
 Furthermore, it can be configured using combined system
 (`/etc/xdg/itectl.yml`) and user (`~/.config/itectl.yml`) yaml
-configuration files and environment variables. Configuration also
-allows you to name rgb colors and use those names as values for
-corresponding command options and configuration properties.
+configuration files and environment variables. The utility also allows
+you to name rgb colors and use those names as values for corresponding
+command options and configuration properties.
 
-`itectl` makes several attempts to discover the ITE 8291 device (with
+`itectl` makes several attempts to discover an ITE 8291 device (with
 a configurable timeout/interval) when the device cannot be found
 immediately. This feature is useful when executing the command
 directly after modprobing ITE 8291 module.
@@ -24,7 +24,7 @@ In addition, the project includes
 
 - default configuration file;
 - `udev` rules to make the ITE 8291 device accessible from user-space;
-- `initcpio` hooks to configure keyboard backlighting at boot time
+- `initcpio` hooks to configure keyboard backlight at boot time
   (useful, for example, when entering a passphrase to decrypt hard drive(s))
 - `bash`, `zsh` and `fish` shells completions.
 
@@ -47,7 +47,7 @@ to work properly.**
 
 ### License: [MIT](./LICENSE)
 
-## Why another ITE 8291 controller ?
+## Why another ITE 8291 keyboard backlight manager ?
 
 This project is highly inspired
 by [ite8291r3-ctl](https://github.com/pobrn/ite8291r3-ctl). Under
@@ -63,11 +63,10 @@ have been added.
 
 So why another project?
 [ite8291r3-ctl](https://github.com/pobrn/ite8291r3-ctl) is a great
-tool, but I needed the following features that that
-[ite8291r3-ctl](https://github.com/pobrn/ite8291r3-ctl) does not have.
+tool, but I lacks the following features that I needed.
 
 - Ability to configure keyboard backlight mode properties (e.g.,
-  brightness, speed, color(s), etc.) through combined system and user
+  brightness, speed, color(s), etc.) using combined system and user
   configuration files and/or environment variables.
 
 - Ability to retry discovery of ITE 8291 device if it cannot be
@@ -75,7 +74,7 @@ tool, but I needed the following features that that
   utility directly after modprobing the ITE 8291r3 module (for
   example, during boot).
 
-- Ability to launch the utility and configure the keyboard backlight
+- Ability to execute the utility and configure the keyboard backlight
   during boot. This feature helps to enter information (such as a
   password to decrypt hard drive(s)) during boot. A Python script is
   not the best choice in this case. Small executable included in
@@ -126,30 +125,30 @@ test-pattern`, `ite8291r3-ctl freeze`, `ite8291r3-ctl palette
 
 ### Features present in itectl and missing from [ite8291r3-ctl](https://github.com/pobrn/ite8291r3-ctl)
 
-- #### Tool configuration
+- #### Configuration
 
   The system configuration file can be used to configure the `itectl`
   common and mode options, default mode, predefined and named colors,
-  etc. The system configuration can be expanded/overridden using the
-  user configuration file and/or environment variables.
+  etc. The system configuration can be expanded or overridden using
+  the user configuration file and/or environment variables.
 
 - #### Named colors
 
-  Any rgb color can be given a name that can be used as the
-  corresponding value of the option or configuration property.
+  Any rgb color can be given a name that can be used as a value of the
+  corresponding options and/or configuration properties.
 
 - #### Device polling
 
-  In cases where the ITE 8291 device cannot be detected immediately,
+  In cases where ITE 8291 device cannot be detected immediately,
   `itectl` will retry at the specified time intervals and stop after
   the specified timeout. This feature can be disabled.
 
-- #### Additional configuration files
+- #### Additional system configuration files
 
   Furthermore, the project includes files that will help you configure
   the utility.
 
-  - default `itectl` system configuration file.
+  - default documented `itectl` system configuration file.
   - `udev` rules to access ITE 8291 device from user-space.
   - `initcpio` hooks to configure keyboard backlight during boot time.
   - shells completions.
@@ -161,9 +160,9 @@ to be installed (e.g., from
 [tuxedo-drivers](https://github.com/tuxedocomputers/tuxedo-drivers))
 to work properly.**
 
-### Installation from AUR repo (for arch systems only)
+### Installation from AUR repository (for arch systems only)
 
-You can install `itectl` through the dedicated
+You can install `itectl` using the dedicated
 [itectl-aur](https://github.com/v4n6/itectl-aur) AUR repository. To do
 this, you need to clone the repository and install the package using
 `makepkg`. For example
@@ -212,10 +211,10 @@ cp ./config/etc/xdg/itectl.yml ~/.config/
 ---
 
 The `udev` [rules](./config/usr/lib/udev/rules.d/10-ite8291r3.rules)
-provided by the project allow access to the discovered ITE 8291r3
-device for users of the systemd `input` group. For the rules to take
-effect, they must be copied to one of the locations recognized by
-`udev` on your system. For example
+provided by the project allow access to a discovered ITE 8291r3 device
+for users of the systemd `input` group. For the rules to take effect,
+they must be copied to one of the locations recognized by `udev` on
+your system. For example
 
 ```
 sudo install -Dm 0644 -o root -g root ./config/usr/lib/udev/rules.d/10-ite8291r3.rules /etc/udev/rules.d/
@@ -252,10 +251,6 @@ To work properly, the `itectl` hook must be included in the
 ```
 HOOKS=(base udev autodetect itectl microcode modconf kms keyboard keymap consolefont block filesystems fsck)
 ```
-
-These hooks rely on ITE 8291 module `ite_8291`. If another ITE 8291
-module is installed, `ite_8291` must be replaced with this module
-name in [config/usr/lib/initcpio/hooks/itectl](./config/usr/lib/initcpio/hooks/itectl).
 
 ---
 
@@ -318,7 +313,7 @@ namedColors:
 
 ```
 
-and user configuration file `~/.config/itectl.yml`;
+and user configuration file `~/.config/itectl.yml`
 
 ```
 mode: fireworks
@@ -337,20 +332,31 @@ namedColors:
   carmine: "0xC60010"
 ```
 
+and environment variables
+
+```
+ITECTL_MODE=ripple
+ITECTL_COLORNUM=3
+ITECTL_PREDEFINEDCOLORS_COLOR3=#xDECC9C
+ITECTL_PREDEFINEDCOLORS_COLOR2=purple
+
+```
+
 will result in the following default values
 
-- default mode set to _fireworks_
+- default mode set to _ripple_
 - default brightness - 40
 - default reset - true
 - default reactive - true
 - default save - false
+- default color number - 3
 - default single-mode color - _melon_ (`#FEBAAD`)
 - device polling - disabled (timeout = 0)
 - predefined colors set to
 
   1. `#FFFFFF`
-  1. `#D1E231`
-  1. `#FFFF00`
+  1. purple (`#6A0DAD`)
+  1. `#DECC9C`
   1. `#00FF00`
   1. `#0000FF`
   1. `#00FFFF`
@@ -362,15 +368,15 @@ will result in the following default values
   - _alloy_orange_ = `#C46210`
   - _goldenrod_ = `#DAA520`
   - _melon_ = `#FEBAAD`
-  - _purple_ = `#6A0DAD1`
+  - _purple_ = `#6A0DAD`
   - _steel_blue_ = `#4682B4`
   - _carmine_ = `0xC60010`
 
 ### Configuration Properties
 
-- **mode** - default mode of the keyboard backlight to set if `itectl`
-  is called with no sub-command specified.<br/> Environment variable:
-  `ITECTL_MODE`.
+- **mode** - default mode to which the keyboard backlight controller
+  is set if `itectl` is called with no command specified.<br/>
+  Environment variable: `ITECTL_MODE`.
 - **brightness** - brightness of the keyboard backlight.<br/>Minimum
   value: **0**. Maximum value: **50**. Default value: **25**.<br/>
   Environment variable: `ITECTL_BRIGHTNESS`.<br/> Command line
@@ -383,25 +389,26 @@ will result in the following default values
   Allowed values: **none**, **left**, **right**, **up**,
   **down**. Default value: **right**.<br/>Environment variable:
   `ITECTL_DIRECTION`.<br/>Command line option(s): `-d`, `--direction`.
-- **colorNum** - number of the predefined color of the keyboard
-  backlight controller to use by effect.<br/>No color: **0**. Random
-  color: **8**. Customizable colors: **1**-**7**. Default value:
-  **8**.<br/> Environment variable: `ITECTL_COLORNUM`.<br/>Command
-  line option(s): `-c`, `--color-num`.
+- **colorNum** - number of the predefined color used in the keyboard
+  backlight mode.<br/>No color: **0**. Random color:
+  **8**. Customizable colors: **1**-**7**. Default value: **8**
+  (random color).<br/> Environment variable:
+  `ITECTL_COLORNUM`.<br/>Command line option(s): `-c`, `--color-num`.
 - **reactive** - determines whether the keyboard backlight effect
-  should react to keypresses.<br/>Default value:
+  should react to key-presses.<br/>Default value:
   **false**.<br/>Environment variable: `ITECTL_REACTIVE`.<br/>Command
   line option: `--reactive`.
 - **reset** - specifies whether the customizable predefined colors
   should be reset to their corresponding configured/default values
-  before setting an effect. Used by all _"mode"_ sub-commands.<br/>
-  Default value: **false**.<br/>Environment variable:
-  `ITECTL_RESET`.<br/>Command line option: `--reset`.
+  before setting the keyboard backlight controller to a mode. Used by
+  all _"-mode"_ commands.<br/> Default value:
+  **false**.<br/>Environment variable: `ITECTL_RESET`.<br/>Command
+  line option: `--reset`.
 - **save** - indicates whether ITE 8291 controller should save its
   state.<br/>Default value: **false**.<br/>Environment variable:
   `ITECTL_SAVE`.<br/>Command line option: `--save`.
-- **singleModeColor** - color of the keyboard backlight to use by
-  single color mode. The option value can be a name of one of
+- **singleModeColor** - color the keyboard backlight controller uses
+  in single color mode. The option value can be a name of one of the
   configured named colors or an rgb value in one of the following
   formats: **0xHHHHHH**, **#xHHHHHH**, **#HHHHHH**, **HHHHHH**,
   **#HHH**, **HHH**.<br/>Default value: **#FFFFFF**.<br/>Environment
@@ -440,14 +447,14 @@ will result in the following default values
     **0**.<br/>Environment variable: `ITECTL_DEVICE_BUS`.<br/>Command
     line option: `--device-bus`.
 
-  - **address** - device number of the ITE 8291 to use. If it's set to
+  - **address** - number of the ITE 8291 device to use. If it's set to
     **0**, the option is ignored.<br/>Default value:
     **0**.<br/>Environment variable:
     `ITECTL_DEVICE_ADDRESS`.<br/>Command line option:
     `--device-address`.
 
-  Both values must be either both positive or non-positive
-  (i.e., ignored). For instance
+  Both values must be either positive or non-positive (i.e.,
+  ignored). For instance
 
   ```
 
@@ -457,9 +464,10 @@ will result in the following default values
 
   ```
 
-- **predefinedColors** - predefined customizable color values.<br/>The
-  keys have the format **color*<N\>***, where _<N\>_ is one of the
-  color numbers (**1**-**7**).<br/>The color value can be either the
+- **predefinedColors** - values of the predefined customizable colors
+  of the ITE 8291 keyboard backlight controller specified as a
+  dictionary. Key has the format **color*<N\>***, where _<N\>_ is one
+  of the color numbers (**1**-**7**). The color value can be either a
   name of one of the configured named colors, or an RGB value in one
   of the following formats: **0xHHHHHH**, **#xHHHHHH**, **#HHHHHH**,
   **HHHHHH**, **#HHH**, **HHH**.<br/>Default values:
@@ -487,17 +495,17 @@ will result in the following default values
 
   ```
 
-- **namedColors** - color name -> RGB color mapping.<br/> The color
-  name can be an arbitrary string.<br/> The color value can be an RGB
-  value in one of the following formats: **0xHHHHHH**, **#xHHHHHH**,
+- **namedColors** - color name -> RGB color mapping. The color name
+  can be an arbitrary string. The color value can be an RGB value in
+  one of the following formats: **0xHHHHHH**, **#xHHHHHH**,
   **#HHHHHH**, **HHHHHH**, **#HHH**, **HHH**. For instance
 
   ```
 
   namedColors:
     aero: "#7CB9E8"
-    alloy_orange: "#C46210"
-    azure: "#007FFF"
+    alloy_orange: "#xC46210"
+    azure: "0x007FFF"
 
   ```
 
@@ -514,25 +522,26 @@ will result in the following default values
 
 ### Common options
 
-The following options are supported by every command
+The following options are supported by every `itectl` command
 
 - `--config` - path to the configuration file. If specified, system
   and user configuration files and environment variables are ignored.
-- `--poll-interval` - timeout interval between attempts to detect a
-  device. The value is ignored if `--poll-timeout` is set to `0`. It
-  defaults to the configured value or 200ms if no value is configured.
+- `--poll-interval` - timeout interval between attempts to detect an
+  ITE 8291 device. The value is ignored if `--poll-timeout` is set to
+  `0`. It defaults to the configured value or `200ms` if no value is
+  configured.
 - `--poll-timeout` - maximum duration of time to wait for an ITE 8291
   device to become available. If set to `0`, only one attempt is made
   to discover an ITE 8291 device, and if it is not found, itectl
   immediately returns with a non-zero exit code. It defaults to the
   configured value or `0` if no value is configured.
-- `--device-bus` - bus number of the ITE 8291. If set to `0`, the
-  option is ignored. The default is the configured value or `0` if the
-  value is not configured.
-- `--device-address` - address number of the ITE 8291. If it is set to
+- `--device-bus` - bus number of the ITE 8291 device. If set to `0`,
+  the option is ignored. The default is the configured value or `0` if
+  the value is not configured.
+- `--device-address` - number of the ITE 8291 device. If it is set to
   `0`, the option is ignored. The default is the configured value or
   `0` if the value is not configured.
-- `--help` - prints a command's help.
+- `--help` - prints help.
 
 ### Mode options
 
@@ -551,19 +560,21 @@ The following options are supported by _-mode_ commands
   `down`. The default is the configured value or `right` if the value
   is not configured.
 
-- `--color-num` - number of the predefined color of the keyboard
-  backlight effect; no color: `0`; random color: `8`; customizable
-  colors: `1`-`7`. The default is the configured value or `8` if the
-  value is not configured.
+- `--color-num` - number of the predefined color used in the keyboard
+  backlight mode; no color: `0`; random color: `8`; customizable
+  colors: `1`-`7`. The default is the configured value or `8`(random
+  color) if the value is not configured.
 
 - `--reactive` - if specified, the keyboard backlight effect will
-  respond to keypresses. Defaults to the configured value, or `false`
+  respond to key-presses. Defaults to the configured value, or `false`
   if no value is configured.
 
-- `--reset` - if specified, custom predefined keyboard backlight
-  colors will be reset to the corresponding configured values or
-  default values if not configured. Default custom predefined colors
-  are
+- `--reset` - if specified, the customizable predefined colors will be
+  reset to their corresponding configured/default values before
+  setting the keyboard backlight controller to a mode. Defaults to the
+  configured value, or `false` if no value is configured. The
+  customizable predefined color values default to the configured
+  colors or the following
 
   1. `#FFFFFF`
   1. `#FF0000`
@@ -572,6 +583,8 @@ The following options are supported by _-mode_ commands
   1. `#0000FF`
   1. `#00FFFF`
   1. `#FF00FF`
+
+  colors if they are not configured.
 
 - `--save` - if specified, the keyboard backlight controller will
   retain its state. Defaults to the configured value, or `false` if no
@@ -602,7 +615,7 @@ The following options are supported by _-mode_ commands
 - `set-brightness` - sets the keyboard backlight brightness to the
   specified value.
 - `set-color` - sets the keyboard backlight custom predefined color
-  sepcified via `-c`|`--color-num` option to the color specified by
+  specified via `-c`|`--color-num` option to the color specified by
   either `--color-name` or `--rgb` or (`--red` and/or `--green` and/or
   `--blue`) options.
 - `single-color-mode` - sets the keyboard backlight to _single-color_
@@ -610,8 +623,8 @@ The following options are supported by _-mode_ commands
   by either `--color-name` or `--rgb` or (`--red` and/or `--green`
   and/or `--blue`) options.
 - `state` - prints out `Off` if the keyboard backlight is turned off
-  by `off-mode` command. Otherwise it prints `On` (even if brightness
-  is set to `0`).
+  by `off-mode` command. Otherwise it prints `On` (even if the
+  brightness is set to `0`).
 - `wave-mode` - sets the keyboard backlight to _wave_ mode.
 
 ## TODO
