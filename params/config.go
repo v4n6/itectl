@@ -74,7 +74,7 @@ func bindAndValidate(cmd *cobra.Command, v *viper.Viper, flagName, configProp st
 		}
 
 		if err := v.BindPFlag(configProp, cmd.Flag(flagName)); err != nil {
-			return err // should never happen
+			panic(err)
 		}
 
 		if validate != nil {
@@ -183,11 +183,6 @@ func ConfigFile(cmd *cobra.Command, flags []string) (cfgFile string, err error) 
 	fs.AddFlagSet(cmd.PersistentFlags())
 
 	_ = fs.Parse(flags) // ignore errors
-
-	cfgFlag := fs.Lookup(ConfigFileFlag)
-	if cfgFlag == nil {
-		return "", nil
-	}
 
 	return fs.GetString(ConfigFileFlag)
 }
