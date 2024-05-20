@@ -35,24 +35,19 @@ const offModeDescription = "Turn the keyboard backlight off."
 // to set keyboard backlight off.
 func newOffModeCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
-	var optionallyResetColors ite8291Call
-
 	offModeCmd := &cobra.Command{
 		Use:   "off-mode",
 		Short: offModeDescription,
 		Long:  offModeDescription,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return call(func(ctl *ite8291.Controller) error {
-				if err := optionallyResetColors(ctl); err != nil {
-					return err
-				}
+			return call(cmd, func(ctl *ite8291.Controller) error {
 				return ctl.SetOffMode()
 			})
 		},
 	}
 
-	optionallyResetColors = params.AddReset(offModeCmd, v)
+	params.AddReset(offModeCmd, v)
 
 	return offModeCmd
 }

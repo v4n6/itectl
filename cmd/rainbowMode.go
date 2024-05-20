@@ -35,28 +35,21 @@ const rainbowModeDescription = "Set keyboard backlight to 'rainbow' mode."
 // to set keyboard backlight to 'rainbow' mode.
 func newRainbowModeCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
-	var brightness func() byte
-	var save func() bool
-	var optionallyResetColors ite8291Call
-
 	var rainbowModeCmd = &cobra.Command{
 		Use:   "rainbow-mode",
 		Short: rainbowModeDescription,
 		Long:  rainbowModeDescription,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return call(func(ctl *ite8291.Controller) error {
-				if err := optionallyResetColors(ctl); err != nil {
-					return err
-				}
-				return ctl.SetRainbowMode(brightness(), save())
+			return call(cmd, func(ctl *ite8291.Controller) error {
+				return ctl.SetRainbowMode(params.Brightness(v), params.Save(v))
 			})
 		},
 	}
 
-	brightness = params.AddBrightness(rainbowModeCmd, v)
-	save = params.AddSave(rainbowModeCmd, v)
-	optionallyResetColors = params.AddReset(rainbowModeCmd, v)
+	params.AddBrightness(rainbowModeCmd, v)
+	params.AddSave(rainbowModeCmd, v)
+	params.AddReset(rainbowModeCmd, v)
 
 	return rainbowModeCmd
 }

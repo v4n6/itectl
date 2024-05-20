@@ -35,11 +35,7 @@ const waveModeDescription = "Set keyboard backlight to 'wave' mode."
 // to set keyboard backlight to 'wave' mode.
 func newWaveModeCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
-	var speed func() byte
-	var brightness func() byte
 	var direction func() ite8291.Direction
-	var save func() bool
-	var optionallyResetColors ite8291Call
 
 	var waveModeCmd = &cobra.Command{
 		Use:   "wave-mode",
@@ -47,20 +43,18 @@ func newWaveModeCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 		Long:  waveModeDescription,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return call(func(ctl *ite8291.Controller) error {
-				if err := optionallyResetColors(ctl); err != nil {
-					return err
-				}
-				return ctl.SetWaveMode(speed(), brightness(), direction(), save())
+			return call(cmd, func(ctl *ite8291.Controller) error {
+				return ctl.SetWaveMode(params.Speed(v), params.Brightness(v),
+					direction(), params.Save(v))
 			})
 		},
 	}
 
-	speed = params.AddSpeed(waveModeCmd, v)
-	brightness = params.AddBrightness(waveModeCmd, v)
+	params.AddSpeed(waveModeCmd, v)
+	params.AddBrightness(waveModeCmd, v)
 	direction = params.AddDirection(waveModeCmd, v)
-	save = params.AddSave(waveModeCmd, v)
-	optionallyResetColors = params.AddReset(waveModeCmd, v)
+	params.AddSave(waveModeCmd, v)
+	params.AddReset(waveModeCmd, v)
 
 	return waveModeCmd
 }

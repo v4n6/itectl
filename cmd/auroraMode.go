@@ -35,13 +35,6 @@ const auroraModeDescription = "Set keyboard backlight to 'aurora' mode."
 // to set keyboard backlight to 'aurora' mode.
 func newAuroraModeCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
-	var speed func() byte
-	var brightness func() byte
-	var colorNum func() byte
-	var reactive func() bool
-	var save func() bool
-	var optionallyResetColors ite8291Call
-
 	auroraModeCmd := &cobra.Command{
 		Use:   "aurora-mode",
 		Short: auroraModeDescription,
@@ -49,22 +42,19 @@ func newAuroraModeCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 		Args:  cobra.NoArgs,
 
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return call(func(ctl *ite8291.Controller) error {
-				if err := optionallyResetColors(ctl); err != nil {
-					return err
-				}
-				return ctl.SetAuroraMode(speed(), brightness(), colorNum(),
-					reactive(), save())
+			return call(cmd, func(ctl *ite8291.Controller) error {
+				return ctl.SetAuroraMode(params.Speed(v), params.Brightness(v),
+					params.ColorNum(v), params.Reactive(v), params.Save(v))
 			})
 		},
 	}
 
-	speed = params.AddSpeed(auroraModeCmd, v)
-	brightness = params.AddBrightness(auroraModeCmd, v)
-	colorNum = params.AddColorNum(auroraModeCmd, v)
-	reactive = params.AddReactive(auroraModeCmd, v)
-	save = params.AddSave(auroraModeCmd, v)
-	optionallyResetColors = params.AddReset(auroraModeCmd, v)
+	params.AddSpeed(auroraModeCmd, v)
+	params.AddBrightness(auroraModeCmd, v)
+	params.AddColorNum(auroraModeCmd, v)
+	params.AddReactive(auroraModeCmd, v)
+	params.AddSave(auroraModeCmd, v)
+	params.AddReset(auroraModeCmd, v)
 
 	return auroraModeCmd
 }

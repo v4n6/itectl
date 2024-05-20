@@ -25,9 +25,9 @@ const (
 
 // namedColors configured named colors
 var namedColors = map[string]string{
-	"NONAME-Color": "ABC",
-	"colour_cyAN":  "#112233",
-	"123":          "0XddEEFf",
+	"NONAME:Color": "ABC",
+	"colour.cyAN":  "#112233",
+	"123-yes":      "0XddEEFf",
 }
 
 // named colors viper config
@@ -36,12 +36,7 @@ var namedColorsConfig = map[string]any{}
 func init() {
 	for n, c := range namedColors {
 		namedColorsConfig[n] = c
-	}
-}
-
-func init() {
-	for k := range namedColors {
-		colorNameAll = append(colorNameAll, k)
+		colorNameAll = append(colorNameAll, n)
 	}
 }
 

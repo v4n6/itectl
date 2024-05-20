@@ -35,32 +35,24 @@ const raindropModeDescription = "Set keyboard backlight to 'raindrop' mode."
 // to set keyboard backlight to 'raindrop' mode.
 func newRaindropModeCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
-	var speed func() byte
-	var brightness func() byte
-	var colorNum func() byte
-	var save func() bool
-	var optionallyResetColors ite8291Call
-
 	var raindropModeCmd = &cobra.Command{
 		Use:   "raindrop-mode",
 		Short: raindropModeDescription,
 		Long:  raindropModeDescription,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return call(func(ctl *ite8291.Controller) error {
-				if err := optionallyResetColors(ctl); err != nil {
-					return err
-				}
-				return ctl.SetRaindropMode(speed(), brightness(), colorNum(), save())
+			return call(cmd, func(ctl *ite8291.Controller) error {
+				return ctl.SetRaindropMode(params.Speed(v), params.Brightness(v),
+					params.ColorNum(v), params.Save(v))
 			})
 		},
 	}
 
-	speed = params.AddSpeed(raindropModeCmd, v)
-	brightness = params.AddBrightness(raindropModeCmd, v)
-	colorNum = params.AddColorNum(raindropModeCmd, v)
-	save = params.AddSave(raindropModeCmd, v)
-	optionallyResetColors = params.AddReset(raindropModeCmd, v)
+	params.AddSpeed(raindropModeCmd, v)
+	params.AddBrightness(raindropModeCmd, v)
+	params.AddColorNum(raindropModeCmd, v)
+	params.AddSave(raindropModeCmd, v)
+	params.AddReset(raindropModeCmd, v)
 
 	return raindropModeCmd
 }

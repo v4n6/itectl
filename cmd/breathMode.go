@@ -35,32 +35,24 @@ const breathModeDescription = "Set keyboard backlight to 'breathing' mode."
 // to set keyboard backlight to 'breathing' mode.
 func newBreathModeCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
-	var speed func() byte
-	var brightness func() byte
-	var colorNum func() byte
-	var save func() bool
-	var optionallyResetColors ite8291Call
-
 	breathModeCmd := &cobra.Command{
 		Use:   "breath-mode",
 		Short: breathModeDescription,
 		Long:  breathModeDescription,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return call(func(ctl *ite8291.Controller) error {
-				if err := optionallyResetColors(ctl); err != nil {
-					return err
-				}
-				return ctl.SetBreathingMode(speed(), brightness(), colorNum(), save())
+			return call(cmd, func(ctl *ite8291.Controller) error {
+				return ctl.SetBreathingMode(params.Speed(v), params.Brightness(v),
+					params.ColorNum(v), params.Save(v))
 			})
 		},
 	}
 
-	speed = params.AddSpeed(breathModeCmd, v)
-	brightness = params.AddBrightness(breathModeCmd, v)
-	colorNum = params.AddColorNum(breathModeCmd, v)
-	save = params.AddSave(breathModeCmd, v)
-	optionallyResetColors = params.AddReset(breathModeCmd, v)
+	params.AddSpeed(breathModeCmd, v)
+	params.AddBrightness(breathModeCmd, v)
+	params.AddColorNum(breathModeCmd, v)
+	params.AddSave(breathModeCmd, v)
+	params.AddReset(breathModeCmd, v)
 
 	return breathModeCmd
 }

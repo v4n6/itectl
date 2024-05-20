@@ -35,34 +35,25 @@ const randomModeDescription = "Set keyboard backlight to 'random' mode."
 // to set keyboard backlight to 'random' mode.
 func newRandomModeCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
-	var speed func() byte
-	var brightness func() byte
-	var colorNum func() byte
-	var reactive func() bool
-	var save func() bool
-	var optionallyResetColors ite8291Call
-
 	var randomModeCmd = &cobra.Command{
 		Use:   "random-mode",
 		Short: randomModeDescription,
 		Long:  randomModeDescription,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return call(func(ctl *ite8291.Controller) error {
-				if err := optionallyResetColors(ctl); err != nil {
-					return err
-				}
-				return ctl.SetRandomMode(speed(), brightness(), colorNum(), reactive(), save())
+			return call(cmd, func(ctl *ite8291.Controller) error {
+				return ctl.SetRandomMode(params.Speed(v), params.Brightness(v),
+					params.ColorNum(v), params.Reactive(v), params.Save(v))
 			})
 		},
 	}
 
-	speed = params.AddSpeed(randomModeCmd, v)
-	brightness = params.AddBrightness(randomModeCmd, v)
-	colorNum = params.AddColorNum(randomModeCmd, v)
-	reactive = params.AddReactive(randomModeCmd, v)
-	save = params.AddSave(randomModeCmd, v)
-	optionallyResetColors = params.AddReset(randomModeCmd, v)
+	params.AddSpeed(randomModeCmd, v)
+	params.AddBrightness(randomModeCmd, v)
+	params.AddColorNum(randomModeCmd, v)
+	params.AddReactive(randomModeCmd, v)
+	params.AddSave(randomModeCmd, v)
+	params.AddReset(randomModeCmd, v)
 
 	return randomModeCmd
 }

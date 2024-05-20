@@ -28,37 +28,35 @@ const (
 )
 
 // AddPoll adds polling related flags to the provided cmd.
-// It also adds hook to bind them to the corresponding viper config properties
-// and to validate poll properties. It ensures that poll interval is a positive duration,
-// poll timeout is a nonnegative duration and that interval is less than the timeout, if timeout is not 0.
-// AddPoll returns functions to retrieve current poll interval and poll timeout values.
-func AddPoll(cmd *cobra.Command, v *viper.Viper) (pollInterval, pollTimeout func() time.Duration) {
+// It also adds hook to bind them to the corresponding viper config properties.
+func AddPoll(cmd *cobra.Command, v *viper.Viper) {
 
 	cmd.PersistentFlags().Duration(PollIntervalFlag, PollIntervalDefault,
 		fmt.Sprintf("Time interval to wait between controller polls. The value is ignored if --%s is set to 0. %s",
 			PollTimeoutFlag, configurationWarning))
-	bindAndValidate(cmd, v, PollIntervalFlag, pollIntervalProp, func() error {
-		if v.GetDuration(pollIntervalProp) > 0 {
-			return nil
-		}
-		return fmt.Errorf("%w %q for (--%s): poll interval must be positive",
-			InvalidOptionValueError, v.GetDuration(pollIntervalProp), PollIntervalFlag)
-	})
+	bindAndValidate(cmd, v, PollIntervalFlag, pollIntervalProp, nil)
 
 	cmd.PersistentFlags().Duration(PollTimeoutFlag, PollTimeoutDefault,
 		fmt.Sprintf("Maximum time to wait for controller to be available. Exit immediately, if it's set to 0 and no controller is available. %s",
 			configurationWarning))
-	bindAndValidate(cmd, v, PollTimeoutFlag, pollTimeoutProp, func() error {
-		if v.GetDuration(pollTimeoutProp) > 0 {
-			if i, t := v.GetDuration(pollIntervalProp), v.GetDuration(pollTimeoutProp); i >= t {
-				return fmt.Errorf("%w %q (--%s) %q (--%s): expected poll interval to be less than poll timeout",
-					InvalidOptionValueError, i, PollIntervalFlag, t, PollTimeoutFlag)
-			}
-		}
+	bindAndValidate(cmd, v, PollTimeoutFlag, pollTimeoutProp, nil)
+}
 
-		return nil
-	})
+// Polls returns polling interval and timeout property values.
+// It also ensures that poll interval is a positive duration
+// less than the timeout, if timeout is not 0.
+func Polls(v *viper.Viper) (pollInterval, pollTimeout time.Duration, err error) {
 
-	return func() time.Duration { return v.GetDuration(pollIntervalProp) },
-		func() time.Duration { return v.GetDuration(pollTimeoutProp) }
+	interval, timeout := v.GetDuration(pollIntervalProp), v.GetDuration(pollTimeoutProp)
+	if interval <= 0 {
+		return 0, 0, fmt.Errorf("%w %q for (--%s): poll interval must be positive",
+			InvalidOptionValueError, v.GetDuration(pollIntervalProp), PollIntervalFlag)
+	}
+
+	if timeout > 0 && interval >= timeout {
+		return 0, 0, fmt.Errorf("%w %q (--%s) %q (--%s): expected poll interval to be less than poll timeout",
+			InvalidOptionValueError, interval, PollIntervalFlag, timeout, PollTimeoutFlag)
+	}
+
+	return interval, timeout, nil
 }

@@ -22,7 +22,7 @@ const (
 // It also adds hook to bind it to the corresponding viper configuration property
 // and to validate its value.
 // AddSpeed returns function to retrieve current speed value.
-func AddSpeed(cmd *cobra.Command, v *viper.Viper) (speed func() byte) {
+func AddSpeed(cmd *cobra.Command, v *viper.Viper) {
 
 	cmd.PersistentFlags().Uint8P(SpeedProp, SpeedShortFlag, SpeedDefault,
 		fmt.Sprintf("Speed of the keyboard backlight effect; min value 0, max value %d. %s",
@@ -31,6 +31,8 @@ func AddSpeed(cmd *cobra.Command, v *viper.Viper) (speed func() byte) {
 		return validateMaxUint8Value(fmt.Sprintf("-%s, --%s", SpeedShortFlag, SpeedProp),
 			byte(v.GetUint(SpeedProp)), ite8291.SpeedMaxValue)
 	})
+}
 
-	return func() byte { return byte(ite8291.SpeedMaxValue - v.GetUint(SpeedProp)) }
+func Speed(v *viper.Viper) byte {
+	return byte(ite8291.SpeedMaxValue - v.GetUint(SpeedProp))
 }

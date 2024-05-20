@@ -37,10 +37,7 @@ const singleColorModeDescription = "Set keyboard backlight to 'single color' mod
 // to set keyboard backlight to 'single color' mode.
 func newSingleColorModeCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
-	var brightness func() byte
 	var color func() *ite8291.Color
-	var save func() bool
-	var optionallyResetColors ite8291Call
 
 	var singleColorModeCmd = &cobra.Command{
 		Use:   "single-color-mode",
@@ -63,19 +60,17 @@ It can be set to either a color name or an rgb directly.`,
 			params.SingleColorProp),
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return call(func(ctl *ite8291.Controller) error {
-				if err := optionallyResetColors(ctl); err != nil {
-					return err
-				}
-				return ctl.SetSingleColorMode(brightness(), color(), save())
+			return call(cmd, func(ctl *ite8291.Controller) error {
+				return ctl.SetSingleColorMode(params.Brightness(v), color(),
+					params.Save(v))
 			})
 		},
 	}
 
-	brightness = params.AddBrightness(singleColorModeCmd, v)
 	color = params.AddSingleModeColor(singleColorModeCmd, v)
-	save = params.AddSave(singleColorModeCmd, v)
-	optionallyResetColors = params.AddReset(singleColorModeCmd, v)
+	params.AddBrightness(singleColorModeCmd, v)
+	params.AddSave(singleColorModeCmd, v)
+	params.AddReset(singleColorModeCmd, v)
 
 	return singleColorModeCmd
 }

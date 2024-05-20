@@ -35,30 +35,23 @@ const marqueeModeDescription = "Set keyboard backlight to 'marquee' mode."
 // to set keyboard backlight to 'marquee' mode.
 func newMarqueeModeCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
-	var brightness func() byte
-	var speed func() byte
-	var save func() bool
-	var optionallyResetColors ite8291Call
-
 	var marqueeModeCmd = &cobra.Command{
 		Use:   "marquee-mode",
 		Short: marqueeModeDescription,
 		Long:  marqueeModeDescription,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return call(func(ctl *ite8291.Controller) error {
-				if err := optionallyResetColors(ctl); err != nil {
-					return err
-				}
-				return ctl.SetMarqueeMode(speed(), brightness(), save())
+			return call(cmd, func(ctl *ite8291.Controller) error {
+				return ctl.SetMarqueeMode(params.Speed(v), params.Brightness(v),
+					params.Save(v))
 			})
 		},
 	}
 
-	speed = params.AddSpeed(marqueeModeCmd, v)
-	brightness = params.AddBrightness(marqueeModeCmd, v)
-	save = params.AddSave(marqueeModeCmd, v)
-	optionallyResetColors = params.AddReset(marqueeModeCmd, v)
+	params.AddSpeed(marqueeModeCmd, v)
+	params.AddBrightness(marqueeModeCmd, v)
+	params.AddSave(marqueeModeCmd, v)
+	params.AddReset(marqueeModeCmd, v)
 
 	return marqueeModeCmd
 }

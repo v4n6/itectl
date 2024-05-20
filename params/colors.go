@@ -45,18 +45,15 @@ const (
 // its value is not a valid color.
 func colorNameToColor(name string, v *viper.Viper) (color *ite8291.Color, err error) {
 
-	if v_ := v.Sub(NamedColorsProp); v_ != nil {
+	if val := v.GetString(fmt.Sprintf("%s.%s", NamedColorsProp, name)); len(val) > 0 {
 
-		if val := v_.GetString(name); len(val) > 0 {
-
-			color, err = ite8291.ParseColor(val)
-			if err != nil {
-				return nil, fmt.Errorf("%w %q for %q: %w", InvalidOptionValueError, name,
-					fmt.Sprintf("--%s", ColorNameFlag), err)
-			}
-
-			return color, nil
+		color, err = ite8291.ParseColor(val)
+		if err != nil {
+			return nil, fmt.Errorf("%w %q for %q: %w", InvalidOptionValueError, name,
+				fmt.Sprintf("--%s", ColorNameFlag), err)
 		}
+
+		return color, nil
 	}
 
 	return nil, fmt.Errorf("%w %q for %q is an unknown color name", InvalidOptionValueError, name,

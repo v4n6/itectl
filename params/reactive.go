@@ -15,12 +15,15 @@ const ReactiveProp = "reactive"
 
 // AddReactive adds reactive flag to the provided cmd.
 // It also adds hook to bind it to the corresponding viper config property.
-// AddReactive returns function to retrieve current reactive property value.
-func AddReactive(cmd *cobra.Command, v *viper.Viper) (reactive func() bool) {
+func AddReactive(cmd *cobra.Command, v *viper.Viper) {
 	cmd.PersistentFlags().Bool(ReactiveProp, ReactiveDefault,
 		fmt.Sprintf("Make the keyboard backlight effect react to user input. %s",
 			configurationWarning))
 	bindAndValidate(cmd, v, ReactiveProp, ReactiveProp, nil)
+}
 
-	return func() bool { return v.GetBool(ReactiveProp) }
+// Reactive returns value of the reactive property
+func Reactive(v *viper.Viper) bool {
+
+	return v.GetBool(ReactiveProp)
 }

@@ -35,34 +35,25 @@ const fireworksModeDescription = "Set keyboard backlight to 'fireworks' mode."
 // to set keyboard backlight to 'fireworks' mode.
 func newFireworksModeCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
-	var speed func() byte
-	var brightness func() byte
-	var colorNum func() byte
-	var reactive func() bool
-	var save func() bool
-	var optionallyResetColors ite8291Call
-
 	fireworksModeCmd := &cobra.Command{
 		Use:   "fireworks-mode",
 		Short: fireworksModeDescription,
 		Long:  fireworksModeDescription,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return call(func(ctl *ite8291.Controller) error {
-				if err := optionallyResetColors(ctl); err != nil {
-					return err
-				}
-				return ctl.SetFireworksMode(speed(), brightness(), colorNum(), reactive(), save())
+			return call(cmd, func(ctl *ite8291.Controller) error {
+				return ctl.SetFireworksMode(params.Speed(v), params.Brightness(v),
+					params.ColorNum(v), params.Reactive(v), params.Save(v))
 			})
 		},
 	}
 
-	speed = params.AddSpeed(fireworksModeCmd, v)
-	brightness = params.AddBrightness(fireworksModeCmd, v)
-	colorNum = params.AddColorNum(fireworksModeCmd, v)
-	reactive = params.AddReactive(fireworksModeCmd, v)
-	save = params.AddSave(fireworksModeCmd, v)
-	optionallyResetColors = params.AddReset(fireworksModeCmd, v)
+	params.AddSpeed(fireworksModeCmd, v)
+	params.AddBrightness(fireworksModeCmd, v)
+	params.AddColorNum(fireworksModeCmd, v)
+	params.AddReactive(fireworksModeCmd, v)
+	params.AddSave(fireworksModeCmd, v)
+	params.AddReset(fireworksModeCmd, v)
 
 	return fireworksModeCmd
 }

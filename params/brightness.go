@@ -21,8 +21,7 @@ const (
 // AddBrightness adds brightness flag to the provided cmd.
 // It also adds hook to bind the flag to the corresponding viper config property
 // and to validate brightness value.
-// It returns function to retrieve current brightness value.
-func AddBrightness(cmd *cobra.Command, v *viper.Viper) (brightness func() byte) {
+func AddBrightness(cmd *cobra.Command, v *viper.Viper) {
 
 	cmd.PersistentFlags().Uint8P(BrightnessProp, BrightnessShortFlag, BrightnessDefault,
 		fmt.Sprintf("Brightness of the keyboard backlight; min value 0, max value %d. %s", ite8291.BrightnessMaxValue, configurationWarning))
@@ -30,6 +29,10 @@ func AddBrightness(cmd *cobra.Command, v *viper.Viper) (brightness func() byte) 
 		return validateMaxUint8Value(fmt.Sprintf("-%s, --%s", BrightnessShortFlag, BrightnessProp),
 			byte(v.GetUint(BrightnessProp)), ite8291.BrightnessMaxValue)
 	})
+}
 
-	return func() byte { return byte(v.GetUint(BrightnessProp)) }
+// Brightness returns brightness property value
+func Brightness(v *viper.Viper) byte {
+
+	return byte(v.GetUint(BrightnessProp))
 }

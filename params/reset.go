@@ -19,8 +19,6 @@ const (
 	PredefinedColorProp = "predefinedColors"
 	// predefinedColorPropTemplate is template of the name of predefined color property.
 	predefinedColorPropTemplate = "%s.color%d"
-	// predefinedColorsNumber is a number of customizable predefined colors.
-	predefinedColorsNumber = ite8291.CustomColorNumMaxValue - ite8291.CustomColorNumMinValue + 1
 )
 
 // default values of predefined colors.
@@ -35,47 +33,38 @@ var PredefinedColorsDefault []string = []string{
 }
 
 // AddReset adds "reset" flag to the provided cmd.
-// It also adds hook to validate configured predefined colors,
-// if "reset" property is set to true.
-// AddReset returns function to reset all customizable predefined colors
-// to their corresponding configured/default values, if "reset" is set to true or do nothing otherwise.
-func AddReset(cmd *cobra.Command, v *viper.Viper) (optionallyResetColors func(ctl *ite8291.Controller) error) {
-
-	colors := make([]*ite8291.Color, predefinedColorsNumber)
+// It also adds hook to bind it to the corresponding viper config property.
+func AddReset(cmd *cobra.Command, v *viper.Viper) {
 
 	cmd.PersistentFlags().Bool(ResetProp, ResetDefault,
-		fmt.Sprintf("Reset the controller customizable predefined colors to their corresponding configured/default values. %s",
+		fmt.Sprintf(
+			"Reset the controller customizable predefined colors to their corresponding configured/default values. %s",
 			configurationWarning))
-	bindAndValidate(cmd, v, ResetProp, ResetProp, func() (err error) {
+	bindAndValidate(cmd, v, ResetProp, ResetProp, nil)
+}
 
-		if v.GetBool(ResetProp) {
+// Reset returns value of reset property
+func Reset(v *viper.Viper) bool {
+	return v.GetBool(ResetProp)
+}
 
-			for i := range predefinedColorsNumber {
-				n := i + 1
+// PredefinedColor returns color of i-th predefined color
+func PredefinedColor(v *viper.Viper, i int) (color *ite8291.Color, err error) {
 
-				val := v.GetString(fmt.Sprintf(predefinedColorPropTemplate, PredefinedColorProp, n))
-				if val == "" {
-					val = PredefinedColorsDefault[i]
-				}
-				// try as color name
-				if colors[i], err = colorNameToColor(val, v); err == nil {
-					continue
-				}
-				// it isn't color name -> try as rgb
-				if colors[i], err = ite8291.ParseColor(val); err != nil {
-					return fmt.Errorf("%w for predefined color #%d: %w",
-						InvalidOptionValueError, n, err)
-				}
-			}
-		}
-
-		return nil
-	})
-
-	return func(ctl *ite8291.Controller) error {
-		if v.GetBool(ResetProp) {
-			return ctl.SetColors(colors)
-		}
-		return nil
+	val := v.GetString(fmt.Sprintf(predefinedColorPropTemplate, PredefinedColorProp, i))
+	if val == "" {
+		val = PredefinedColorsDefault[i-1]
 	}
+
+	// try as color name
+	if color, err = colorNameToColor(val, v); err == nil {
+		return color, nil
+	}
+	// it isn't color name -> try as rgb
+	if color, err = ite8291.ParseColor(val); err != nil {
+		return nil, fmt.Errorf("%w for predefined color #%d: %w",
+			InvalidOptionValueError, i, err)
+	}
+
+	return color, nil
 }

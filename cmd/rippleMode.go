@@ -35,34 +35,25 @@ const rippleModeDescription = "Set keyboard backlight to 'ripple' mode."
 // to set keyboard backlight to 'ripple' mode.
 func newRippleModeCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
-	var speed func() byte
-	var brightness func() byte
-	var colorNum func() byte
-	var reactive func() bool
-	var save func() bool
-	var optionallyResetColors ite8291Call
-
 	var rippleModeCmd = &cobra.Command{
 		Use:   "ripple-mode",
 		Short: rippleModeDescription,
 		Long:  rippleModeDescription,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return call(func(ctl *ite8291.Controller) error {
-				if err := optionallyResetColors(ctl); err != nil {
-					return err
-				}
-				return ctl.SetRippleMode(speed(), brightness(), colorNum(), reactive(), save())
+			return call(cmd, func(ctl *ite8291.Controller) error {
+				return ctl.SetRippleMode(params.Speed(v), params.Brightness(v),
+					params.ColorNum(v), params.Reactive(v), params.Save(v))
 			})
 		},
 	}
 
-	speed = params.AddSpeed(rippleModeCmd, v)
-	brightness = params.AddBrightness(rippleModeCmd, v)
-	colorNum = params.AddColorNum(rippleModeCmd, v)
-	reactive = params.AddReactive(rippleModeCmd, v)
-	save = params.AddSave(rippleModeCmd, v)
-	optionallyResetColors = params.AddReset(rippleModeCmd, v)
+	params.AddSpeed(rippleModeCmd, v)
+	params.AddBrightness(rippleModeCmd, v)
+	params.AddColorNum(rippleModeCmd, v)
+	params.AddReactive(rippleModeCmd, v)
+	params.AddSave(rippleModeCmd, v)
+	params.AddReset(rippleModeCmd, v)
 
 	return rippleModeCmd
 }

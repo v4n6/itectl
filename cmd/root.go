@@ -98,7 +98,7 @@ type readConfig func(cmd *cobra.Command, v *viper.Viper, cfgFile string) error
 type ite8291Call func(ctl *ite8291.Controller) error
 
 // ite8291Ctl type defines a function that provides ite8291r3 controller and calls given f with it.
-type ite8291Ctl func(f ite8291Call) error
+type ite8291Ctl func(cmd *cobra.Command, f ite8291Call) error
 
 // findDevice type provides a function that looks up a supported ite8291r3 device based on the given parameters.
 // It returns pointer to found device or occurred error.
@@ -122,6 +122,26 @@ func findIteDevice(useDevice bool, bus, address int,
 	return ite8291.FindDevice(pollInterval, pollTimeout, devChecker)
 }
 
+// resetColors resets predefined colors to their configured/default values
+// if reset is set to true and cmd supports reset flag
+func resetColors(ctl *ite8291.Controller, v *viper.Viper, cmd *cobra.Command) (err error) {
+
+	if cmd.Flag(params.ResetProp) == nil || !params.Reset(v) {
+		return nil
+	}
+
+	predefinedColorsNumber := ite8291.CustomColorNumMaxValue - ite8291.CustomColorNumMinValue + 1
+	colors := make([]*ite8291.Color, predefinedColorsNumber)
+
+	for i := range predefinedColorsNumber {
+		if colors[i], err = params.PredefinedColor(v, i+1); err != nil {
+			return err
+		}
+	}
+
+	return ctl.SetColors(colors)
+}
+
 // newRootCmd creates, initializes and returns root command.
 // v is a viper instance used by commands instead of static one.
 // find is a findDevice function used to obtain ite8291r3 device instance.
@@ -137,24 +157,34 @@ func newRootCmd(v *viper.Viper, find findDevice) *cobra.Command {
 		CompletionOptions: cobra.CompletionOptions{HiddenDefaultCmd: true},
 	}
 
-	// config flag
 	params.AddConfigFlag(rootCmd)
-
-	// poll related properties
-	pollInterval, pollTimeout := params.AddPoll(rootCmd, v)
-	// device related properties
-	useDevive, deviceBus, deviceAddress := params.AddDevice(rootCmd, v)
+	params.AddPoll(rootCmd, v)
+	params.AddDevice(rootCmd, v)
 
 	// ite8291Ctl
-	exec := func(f ite8291Call) error {
+	exec := func(cmd *cobra.Command, f ite8291Call) error {
 
-		dev, err := find(useDevive(), deviceBus(), deviceAddress(), pollInterval(), pollTimeout())
+		pollInterval, pollTimeout, err := params.Polls(v)
+		if err != nil {
+			return err
+		}
+
+		useDev, devBus, devAddr, err := params.Device(v)
+		if err != nil {
+			return err
+		}
+
+		dev, err := find(useDev, devBus, devAddr, pollInterval, pollTimeout)
 		if err != nil {
 			return err
 		}
 
 		ctl := ite8291.NewController(dev)
 		defer ctl.Close()
+
+		if err := resetColors(ctl, v, cmd); err != nil {
+			return err
+		}
 
 		return f(ctl)
 	}

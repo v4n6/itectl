@@ -15,11 +15,14 @@ const SaveProp = "save"
 
 // AddSave adds "save" flag to the provided cmd.
 // It also adds hook to bind it to the corresponding viper config property.
-// It returns functions to retrieve current "save" property value.
-func AddSave(cmd *cobra.Command, v *viper.Viper) (save func() bool) {
+func AddSave(cmd *cobra.Command, v *viper.Viper) {
 	cmd.PersistentFlags().Bool(SaveProp, SaveDefault,
 		fmt.Sprintf("Instruct the controller to save its state. %s", configurationWarning))
 	bindAndValidate(cmd, v, SaveProp, SaveProp, nil)
+}
 
-	return func() bool { return v.GetBool(SaveProp) }
+// Save returns value of save property
+func Save(v *viper.Viper) bool {
+
+	return v.GetBool(SaveProp)
 }

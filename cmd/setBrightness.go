@@ -35,21 +35,20 @@ const setBrightnessDescription = "Set keyboard backlight brightness."
 // to set keyboard backlight brightness.
 func newSetBrightnessCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
-	var brightness func() byte
-
 	var setBrightnessCmd = &cobra.Command{
 		Use:   "set-brightness",
 		Short: setBrightnessDescription,
 		Long:  setBrightnessDescription,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return call(func(ctl *ite8291.Controller) error {
-				return ctl.SetBrightness(brightness())
+			return call(cmd, func(ctl *ite8291.Controller) error {
+				return ctl.SetBrightness(params.Brightness(v))
 			})
 		},
 	}
 
-	brightness = params.AddBrightness(setBrightnessCmd, v)
+	params.AddBrightness(setBrightnessCmd, v)
+
 	if err := setBrightnessCmd.MarkPersistentFlagRequired("brightness"); err != nil {
 		panic(err)
 	}

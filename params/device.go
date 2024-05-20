@@ -27,46 +27,47 @@ const (
 )
 
 // AddDevice adds device related flags to the provided cmd.
-// It also adds hook to bind them to the corresponding viper config properties
-// and to validate device properties. It ensures that either
-// both device bus and device address properties are not set, or both are set.
-// It returns functions to retrieve current useDevice, deviceBus and deviceAddress values.
-func AddDevice(cmd *cobra.Command, v *viper.Viper) (useDevice func() bool,
-	deviceBus, deviceAddress func() int) {
-
-	var useDev bool
+// It also adds hook to bind them to the corresponding viper config properties.
+func AddDevice(cmd *cobra.Command, v *viper.Viper) {
 
 	cmd.PersistentFlags().Uint(DeviceBusFlag, DeviceBusDefault,
 		fmt.Sprintf("Bus number of the keyboard backlight device. %s", configurationWarning))
 	bindAndValidate(cmd, v, DeviceBusFlag, deviceBusProp, nil)
+
 	cmd.PersistentFlags().Uint(DeviceAddressFlag, DeviceAddressDefault,
 		fmt.Sprintf("Address of the keyboard backlight device. %s", configurationWarning))
 	bindAndValidate(cmd, v, DeviceAddressFlag, deviceAddressProp, nil)
+}
 
-	addValidationHook(cmd, func() error {
+// Device returns device related property values:
+//
+// useDevice - whether a specific device identified by device bus and
+// number should be used
+//
+// deviceBus, deviceAddress - device bus and number properties respectively.
+//
+// It also validates device bus and number. It ensures that either
+// both are positive, or non-positive.
+func Device(v *viper.Viper) (useDevice bool,
+	deviceBus, deviceAddress int, err error) {
 
-		bus, address := v.GetUint(deviceBusProp), v.GetUint(deviceAddressProp)
+	deviceBus, deviceAddress = v.GetInt(deviceBusProp), v.GetInt(deviceAddressProp)
 
-		if bus > 0 && address > 0 {
-			useDev = true
-			return nil // device is set
-		}
+	if deviceBus > 0 && deviceAddress > 0 {
+		return true, deviceBus, deviceAddress, nil // device is set
+	}
 
-		if bus == 0 {
-			if address > 0 {
-				return fmt.Errorf("%w device bus number missing for \"--%s\" (either configured or specified explicitly)",
+	if deviceBus == 0 {
+		if deviceAddress > 0 {
+			return false, 0, 0,
+				fmt.Errorf("%w device bus number missing for \"--%s\" (either configured or specified explicitly)",
 					InvalidOptionValueError, DeviceBusFlag)
-			}
-
-			useDev = false
-			return nil // device is not set
 		}
 
-		return fmt.Errorf("%w device address missing for \"--%s\" (either configured or specified explicitly)",
-			InvalidOptionValueError, DeviceAddressFlag)
-	})
+		return false, 0, 0, nil // device is not set
+	}
 
-	return func() bool { return useDev },
-		func() int { return v.GetInt(deviceBusProp) },
-		func() int { return v.GetInt(deviceAddressProp) }
+	return false, 0, 0,
+		fmt.Errorf("%w device address missing for \"--%s\" (either configured or specified explicitly)",
+			InvalidOptionValueError, DeviceAddressFlag)
 }

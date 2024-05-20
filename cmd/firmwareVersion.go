@@ -42,7 +42,7 @@ func newFirmwareVersionCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 		Long:  firmwareVersionDescription,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return call(func(ctl *ite8291.Controller) error {
+			return call(cmd, func(ctl *ite8291.Controller) error {
 				ver, err := ctl.GetFirmwareVersion()
 				if err != nil {
 					return err

@@ -42,7 +42,7 @@ func newBrightnessCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 		Long:  brightnessDescription,
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return call(func(ctl *ite8291.Controller) error {
+			return call(cmd, func(ctl *ite8291.Controller) error {
 				brightness, err := ctl.GetBrightness()
 				if err != nil {
 					return err
