@@ -36,10 +36,12 @@ const raindropModeDescription = "Set keyboard backlight to 'raindrop' mode."
 func newRaindropModeCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
 	var raindropModeCmd = &cobra.Command{
-		Use:   "raindrop-mode",
-		Short: raindropModeDescription,
-		Long:  raindropModeDescription,
-		Args:  cobra.NoArgs,
+		Use:           "raindrop-mode",
+		Short:         raindropModeDescription,
+		Long:          raindropModeDescription,
+		Args:          cobra.NoArgs,
+		SilenceErrors: true,
+
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return call(cmd, func(ctl *ite8291.Controller) error {
 				return ctl.SetRaindropMode(params.Speed(v), params.Brightness(v),

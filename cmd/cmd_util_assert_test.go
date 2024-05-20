@@ -120,7 +120,7 @@ func assertValidationError(dev *deviceStubT, cmdErr error, err *gbytes.Buffer, v
 	}
 
 	Ω(cmdErr).Should(MatchError(SatisfyAll(matchers...)))
-	Ω(err.Contents()).Should(SatisfyAll(matchers...))
+	Ω(err.Contents()).Should(BeEmpty())
 }
 
 // assertFindDeviceCall asserts that findDevice function was called only one with given arguments.

@@ -38,10 +38,12 @@ func newWaveModeCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 	var direction func() ite8291.Direction
 
 	var waveModeCmd = &cobra.Command{
-		Use:   "wave-mode",
-		Short: waveModeDescription,
-		Long:  waveModeDescription,
-		Args:  cobra.NoArgs,
+		Use:           "wave-mode",
+		Short:         waveModeDescription,
+		Long:          waveModeDescription,
+		Args:          cobra.NoArgs,
+		SilenceErrors: true,
+
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return call(cmd, func(ctl *ite8291.Controller) error {
 				return ctl.SetWaveMode(params.Speed(v), params.Brightness(v),

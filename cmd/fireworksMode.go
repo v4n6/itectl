@@ -36,10 +36,12 @@ const fireworksModeDescription = "Set keyboard backlight to 'fireworks' mode."
 func newFireworksModeCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
 	fireworksModeCmd := &cobra.Command{
-		Use:   "fireworks-mode",
-		Short: fireworksModeDescription,
-		Long:  fireworksModeDescription,
-		Args:  cobra.NoArgs,
+		Use:           "fireworks-mode",
+		Short:         fireworksModeDescription,
+		Long:          fireworksModeDescription,
+		Args:          cobra.NoArgs,
+		SilenceErrors: true,
+
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return call(cmd, func(ctl *ite8291.Controller) error {
 				return ctl.SetFireworksMode(params.Speed(v), params.Brightness(v),

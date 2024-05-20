@@ -36,10 +36,11 @@ const auroraModeDescription = "Set keyboard backlight to 'aurora' mode."
 func newAuroraModeCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
 	auroraModeCmd := &cobra.Command{
-		Use:   "aurora-mode",
-		Short: auroraModeDescription,
-		Long:  auroraModeDescription,
-		Args:  cobra.NoArgs,
+		Use:           "aurora-mode",
+		Short:         auroraModeDescription,
+		Long:          auroraModeDescription,
+		Args:          cobra.NoArgs,
+		SilenceErrors: true,
 
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return call(cmd, func(ctl *ite8291.Controller) error {

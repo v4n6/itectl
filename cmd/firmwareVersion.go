@@ -37,10 +37,12 @@ const firmwareVersionDescription = "Retrieve and print firmware version of the k
 func newFirmwareVersionCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
 	return &cobra.Command{
-		Use:   "firmware-version",
-		Short: firmwareVersionDescription,
-		Long:  firmwareVersionDescription,
-		Args:  cobra.NoArgs,
+		Use:           "firmware-version",
+		Short:         firmwareVersionDescription,
+		Long:          firmwareVersionDescription,
+		Args:          cobra.NoArgs,
+		SilenceErrors: true,
+
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return call(cmd, func(ctl *ite8291.Controller) error {
 				ver, err := ctl.GetFirmwareVersion()

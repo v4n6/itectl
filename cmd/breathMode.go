@@ -36,10 +36,12 @@ const breathModeDescription = "Set keyboard backlight to 'breathing' mode."
 func newBreathModeCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
 	breathModeCmd := &cobra.Command{
-		Use:   "breath-mode",
-		Short: breathModeDescription,
-		Long:  breathModeDescription,
-		Args:  cobra.NoArgs,
+		Use:           "breath-mode",
+		Short:         breathModeDescription,
+		Long:          breathModeDescription,
+		Args:          cobra.NoArgs,
+		SilenceErrors: true,
+
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return call(cmd, func(ctl *ite8291.Controller) error {
 				return ctl.SetBreathingMode(params.Speed(v), params.Brightness(v),

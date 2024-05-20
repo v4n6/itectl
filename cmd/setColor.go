@@ -56,7 +56,9 @@ The color can also be provided by a combination of (--%s, --%s, --%s) flags.`,
 			params.ColorNameFlag, params.NamedColorsProp,
 			params.ColorRGBFlag, ite8291.SupportedColorStringFormats,
 			params.ColorRedFlag, params.ColorGreenFlag, params.ColorBlueFlag),
-		Args: cobra.NoArgs,
+		Args:          cobra.NoArgs,
+		SilenceErrors: true,
+
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return call(cmd, func(ctl *ite8291.Controller) error {
 				return ctl.SetColor(colorNum(), color())

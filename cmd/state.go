@@ -40,10 +40,12 @@ func newStateCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
 	// stateCmd represents the state command
 	var stateCmd = &cobra.Command{
-		Use:   "state",
-		Short: "Get the current state of the keyboard backlight.",
-		Long:  `Print state of the keyboard backlight as either 'on' or 'off'.`,
-		Args:  cobra.NoArgs,
+		Use:           "state",
+		Short:         "Get the current state of the keyboard backlight.",
+		Long:          `Print state of the keyboard backlight as either 'on' or 'off'.`,
+		Args:          cobra.NoArgs,
+		SilenceErrors: true,
+
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return call(cmd, func(ctl *ite8291.Controller) error {
 				isOn, err := ctl.State()

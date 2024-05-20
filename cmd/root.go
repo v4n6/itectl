@@ -34,13 +34,11 @@ import (
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
-// errorHeading - string printed to error output before the actual error
-const errorHeading = "Error:"
-
 // Execute invokes the application.
 func Execute() {
 
-	_ = ExecuteCmd(os.Args[1:], os.Stdout, os.Stderr, findIteDevice, params.ReadConfig)
+	cobra.CheckErr(
+		ExecuteCmd(os.Args[1:], os.Stdout, os.Stderr, findIteDevice, params.ReadConfig))
 }
 
 // ExecuteCmd invokes the command provided by args or sets keyboard backlight to a configured mode.
@@ -61,18 +59,15 @@ func ExecuteCmd(args []string, output, errOut io.Writer,
 
 	cmd, flags, err := rootCmd.Traverse(args) // get sub-command
 	if err != nil {
-		fmt.Fprintln(errOut, errorHeading, err)
 		return err
 	}
 
 	cfgFile, err := params.ConfigFile(rootCmd, flags)
 	if err != nil {
-		fmt.Fprintln(errOut, errorHeading, err)
 		return err
 	}
 
 	if err = readConf(rootCmd, v, cfgFile); err != nil {
-		fmt.Fprintln(errOut, errorHeading, err)
 		return err
 	}
 
@@ -161,6 +156,7 @@ func newRootCmd(v *viper.Viper, find findDevice) *cobra.Command {
 		TraverseChildren:  true,
 		Args:              cobra.NoArgs,
 		CompletionOptions: cobra.CompletionOptions{HiddenDefaultCmd: true},
+		SilenceErrors:     true,
 	}
 
 	params.AddConfigFlag(rootCmd)

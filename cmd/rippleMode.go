@@ -36,10 +36,12 @@ const rippleModeDescription = "Set keyboard backlight to 'ripple' mode."
 func newRippleModeCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
 	var rippleModeCmd = &cobra.Command{
-		Use:   "ripple-mode",
-		Short: rippleModeDescription,
-		Long:  rippleModeDescription,
-		Args:  cobra.NoArgs,
+		Use:           "ripple-mode",
+		Short:         rippleModeDescription,
+		Long:          rippleModeDescription,
+		Args:          cobra.NoArgs,
+		SilenceErrors: true,
+
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return call(cmd, func(ctl *ite8291.Controller) error {
 				return ctl.SetRippleMode(params.Speed(v), params.Brightness(v),

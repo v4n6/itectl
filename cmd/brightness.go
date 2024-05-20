@@ -37,10 +37,12 @@ const brightnessDescription = "Retrieve and print current brightness of the keyb
 func newBrightnessCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
 
 	return &cobra.Command{
-		Use:   "brightness",
-		Short: brightnessDescription,
-		Long:  brightnessDescription,
-		Args:  cobra.NoArgs,
+		Use:           "brightness",
+		Short:         brightnessDescription,
+		Long:          brightnessDescription,
+		Args:          cobra.NoArgs,
+		SilenceErrors: true,
+
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return call(cmd, func(ctl *ite8291.Controller) error {
 				brightness, err := ctl.GetBrightness()
