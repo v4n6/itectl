@@ -151,7 +151,8 @@ func mergeConfig(cmd *cobra.Command, v *viper.Viper, dir string) error {
 
 	if err := readInConfig(v_, "", dir); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-			return err // return error if config file was found and error occured
+			return fmt.Errorf( // return error if config file was found and error occured
+				"error reading configuration %q at %q: %w", ConfigName, dir, err)
 		}
 	}
 

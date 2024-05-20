@@ -67,7 +67,7 @@ func ExecuteCmd(args []string, output, errOut io.Writer,
 	}
 
 	if err = readConf(rootCmd, v, cfgFile); err != nil {
-		return err
+		cobra.CheckErr(err)
 	}
 
 	if cmd.Use == rootCmd.Use &&
