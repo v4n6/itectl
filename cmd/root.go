@@ -34,6 +34,9 @@ import (
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
+// errorHeading - string printed to error output before the actual error
+const errorHeading = "Error:"
+
 // Execute invokes the application.
 func Execute() {
 
@@ -58,16 +61,19 @@ func ExecuteCmd(args []string, output, errOut io.Writer,
 
 	cmd, flags, err := rootCmd.Traverse(args) // get sub-command
 	if err != nil {
-		cobra.CheckErr(err)
+		fmt.Fprintln(errOut, errorHeading, err)
+		return err
 	}
 
 	cfgFile, err := params.ConfigFile(rootCmd, flags)
 	if err != nil {
-		cobra.CheckErr(err)
+		fmt.Fprintln(errOut, errorHeading, err)
+		return err
 	}
 
 	if err = readConf(rootCmd, v, cfgFile); err != nil {
-		cobra.CheckErr(err)
+		fmt.Fprintln(errOut, errorHeading, err)
+		return err
 	}
 
 	if cmd.Use == rootCmd.Use &&
