@@ -45,7 +45,7 @@ func ColorNum(v *viper.Viper) byte {
 // AddCustomColorNum adds customizable color number flag to the provided cmd.
 // It also adds hook to validate its value.
 // It returns function to retrieve current color number flag value.
-func AddCustomColorNum(cmd *cobra.Command, v *viper.Viper) (assignableColorNum func() byte) {
+func AddCustomColorNum(cmd *cobra.Command) (assignableColorNum func() byte) {
 
 	var customColorNum byte
 

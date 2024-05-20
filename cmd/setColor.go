@@ -64,7 +64,7 @@ The color can also be provided by a combination of (--%s, --%s, --%s) flags.`,
 		},
 	}
 
-	colorNum = params.AddCustomColorNum(setColorCmd, v)
+	colorNum = params.AddCustomColorNum(setColorCmd)
 	color = params.AddColor(setColorCmd, v)
 
 	return setColorCmd
