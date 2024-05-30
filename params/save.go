@@ -21,7 +21,7 @@ func AddSave(cmd *cobra.Command, v *viper.Viper) {
 	bindAndValidate(cmd, v, SaveProp, SaveProp, nil)
 }
 
-// Save returns value of save property
+// Save returns save property value
 func Save(v *viper.Viper) bool {
 
 	return v.GetBool(SaveProp)

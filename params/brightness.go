@@ -20,7 +20,7 @@ const (
 
 // AddBrightness adds brightness flag to the provided cmd.
 // It also adds hook to bind the flag to the corresponding viper config property
-// and to validate brightness value.
+// and to validate its value.
 func AddBrightness(cmd *cobra.Command, v *viper.Viper) {
 
 	cmd.PersistentFlags().Uint8P(BrightnessProp, BrightnessShortFlag, BrightnessDefault,

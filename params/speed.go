@@ -21,7 +21,6 @@ const (
 // AddSpeed adds speed flag to the provided cmd.
 // It also adds hook to bind it to the corresponding viper configuration property
 // and to validate its value.
-// AddSpeed returns function to retrieve current speed value.
 func AddSpeed(cmd *cobra.Command, v *viper.Viper) {
 
 	cmd.PersistentFlags().Uint8P(SpeedProp, SpeedShortFlag, SpeedDefault,
@@ -33,6 +32,7 @@ func AddSpeed(cmd *cobra.Command, v *viper.Viper) {
 	})
 }
 
+// Speed returns speed property value
 func Speed(v *viper.Viper) byte {
 	return byte(ite8291.SpeedMaxValue - v.GetUint(SpeedProp))
 }

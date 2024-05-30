@@ -197,22 +197,13 @@ func (c *Controller) GetBrightness() (brightness byte, err error) {
 	return out[4], nil
 }
 
-// SetAuroraMode sets ite8291r3 keyboard backlight to 'aurora' effect.
-// it uses following attributes:
-// brightness of backlight
-// colorNum - number of predefined color
-// whether the effect should be reactive.
-// whether to save effect in the controller
+// SetAuroraMode sets ite8291r3 keyboard backlight controller to 'aurora' effect
 func (c *Controller) SetAuroraMode(speed, brightness, colorNum byte, reactive, save bool) error {
 
 	return c.setEffectWithReactive(SetEffectOp, AuroraEffect, speed, brightness, colorNum, reactive, save)
 }
 
-// SetBreathingMode sets ite8291r3 keyboard backlight to 'breathing' effect.
-// it uses following attributes:
-// brightness of backlight
-// colorNum - number of predefined color
-// whether to save effect in the controller
+// SetBreathingMode sets ite8291r3 keyboard backlight controller to 'breathing' effect
 func (c *Controller) SetBreathingMode(speed, brightness, colorNum byte, save bool) error {
 
 	return c.setEffectWithReactive(SetEffectOp, BreathingEffect, speed, brightness, colorNum, false, save)

@@ -22,7 +22,7 @@ func AddReactive(cmd *cobra.Command, v *viper.Viper) {
 	bindAndValidate(cmd, v, ReactiveProp, ReactiveProp, nil)
 }
 
-// Reactive returns value of the reactive property
+// Reactive returns reactive property value
 func Reactive(v *viper.Viper) bool {
 
 	return v.GetBool(ReactiveProp)
