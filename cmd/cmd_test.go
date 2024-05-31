@@ -17,6 +17,7 @@ import (
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
+//nolint:goconst
 var _ = Describe("cmd package", func() {
 
 	var dev *deviceStubT
@@ -48,7 +49,7 @@ var _ = Describe("cmd package", func() {
 		}
 
 		// execute the command
-		cmdErr = ExecuteCmd(cmdArgs, cmdOut, cmdErrOut,
+		cmdErr = executeCmd(cmdArgs, cmdOut, cmdErrOut,
 			newFindDevice(dev, findDevCall), // find device function
 			newReadConfig(readConfigCall),
 		)
@@ -126,7 +127,7 @@ var _ = Describe("cmd package", func() {
 					func(ex *execT) {
 
 						BeforeEach(func() {
-							subCmd, cmdArgs = "state", ex.genArgs(nil, defs, r)
+							subCmd, cmdArgs = "state", ex.genArgs(defs, r)
 						})
 
 						DescribeTableSubtree("when device is",
@@ -140,7 +141,8 @@ var _ = Describe("cmd package", func() {
 									assertOnlyControlCall(dev, []*ctlArgsT{&ctlArgsT{
 										requestType: 0x21, request: 9, value: 0x300, index: 1, data: []byte{0x88}, length: 1, timeout: 0,
 									}, &ctlArgsT{
-										requestType: 0xA1, request: 1, value: 0x300, index: 1, data: []byte{8, 0, 0, 0, 0, 0, 0, 0}, length: 8, timeout: 0,
+										requestType: 0xA1, request: 1, value: 0x300, index: 1, data: []byte{8, 0, 0, 0, 0, 0, 0, 0},
+										length: 8, timeout: 0,
 									}})
 
 									assertCommandOutput(cmdOut, cmdErrOut, msg)
@@ -169,7 +171,7 @@ var _ = Describe("cmd package", func() {
 					func(ex *execT) {
 
 						BeforeEach(func() {
-							subCmd, cmdArgs = "set-brightness", ex.genArgs(nil, defs, r)
+							subCmd, cmdArgs = "set-brightness", ex.genArgs(defs, r)
 						})
 
 						It("correctly calls usb device", func() {
@@ -201,7 +203,7 @@ var _ = Describe("cmd package", func() {
 
 						BeforeEach(func() {
 							brightness, subCmd = r.Intn(ite8291.BrightnessMaxValue), "brightness"
-							cmdArgs = ex.genArgs(nil, defs, r)
+							cmdArgs = ex.genArgs(defs, r)
 
 							dev.ctlChangedData = [][]byte{nil, []byte{8, 0, 0, 0, byte(brightness), 0, 0, 0}}
 						})
@@ -211,7 +213,8 @@ var _ = Describe("cmd package", func() {
 							assertOnlyControlCall(dev, []*ctlArgsT{&ctlArgsT{
 								requestType: 0x21, request: 9, value: 0x300, index: 1, data: []byte{0x88}, length: 1, timeout: 0,
 							}, &ctlArgsT{
-								requestType: 0xA1, request: 1, value: 0x300, index: 1, data: []byte{8, 0, 0, 0, 0, 0, 0, 0}, length: 8, timeout: 0,
+								requestType: 0xA1, request: 1, value: 0x300, index: 1, data: []byte{8, 0, 0, 0, 0, 0, 0, 0},
+								length: 8, timeout: 0,
 							}})
 
 							assertCommandOutput(cmdOut, cmdErrOut, strconv.Itoa(brightness))
@@ -237,7 +240,7 @@ var _ = Describe("cmd package", func() {
 						var version []byte
 
 						BeforeEach(func() {
-							subCmd, cmdArgs = "firmware-version", ex.genArgs(nil, defs, r)
+							subCmd, cmdArgs = "firmware-version", ex.genArgs(defs, r)
 
 							version = []byte{byte(r.Intn(255)), byte(r.Intn(255)), byte(r.Intn(255)), byte(r.Intn(255))}
 
@@ -249,10 +252,12 @@ var _ = Describe("cmd package", func() {
 							assertOnlyControlCall(dev, []*ctlArgsT{&ctlArgsT{
 								requestType: 0x21, request: 9, value: 0x300, index: 1, data: []byte{0x80}, length: 1, timeout: 0,
 							}, &ctlArgsT{
-								requestType: 0xA1, request: 1, value: 0x300, index: 1, data: []byte{8, 0, 0, 0, 0, 0, 0, 0}, length: 8, timeout: 0,
+								requestType: 0xA1, request: 1, value: 0x300, index: 1, data: []byte{8, 0, 0, 0, 0, 0, 0, 0},
+								length: 8, timeout: 0,
 							}})
 
-							assertCommandOutput(cmdOut, cmdErrOut, fmt.Sprintf("%d.%d.%d.%d", version[0], version[1], version[2], version[3]))
+							assertCommandOutput(cmdOut, cmdErrOut, fmt.Sprintf("%d.%d.%d.%d",
+								version[0], version[1], version[2], version[3]))
 
 							assertFindDeviceCall(findDevCall, ex.Device(), ex.DeviceBus(), ex.DeviceAddress(),
 								ex.PollInterval(), ex.PollTimeout())
@@ -273,7 +278,7 @@ var _ = Describe("cmd package", func() {
 					func(ex *execT) {
 
 						BeforeEach(func() {
-							subCmd, cmdArgs = "set-color", ex.genArgs(nil, defs, r)
+							subCmd, cmdArgs = "set-color", ex.genArgs(defs, r)
 						})
 
 						It("correctly calls usb device", func() {
@@ -320,7 +325,7 @@ var _ = Describe("cmd package", func() {
 							func(ex *execT) {
 
 								BeforeEach(func() {
-									subCmd, cmdArgs = "aurora-mode", ex.genArgs(nil, defs, r)
+									subCmd, cmdArgs = "aurora-mode", ex.genArgs(defs, r)
 								})
 
 								It("correctly calls usb device", func() {
@@ -356,7 +361,7 @@ var _ = Describe("cmd package", func() {
 							func(ex *execT) {
 
 								BeforeEach(func() {
-									subCmd, cmdArgs = "breath-mode", ex.genArgs(nil, defs, r)
+									subCmd, cmdArgs = "breath-mode", ex.genArgs(defs, r)
 								})
 
 								It("correctly calls usb device", func() {
@@ -392,7 +397,7 @@ var _ = Describe("cmd package", func() {
 							func(ex *execT) {
 
 								BeforeEach(func() {
-									subCmd, cmdArgs = "fireworks-mode", ex.genArgs(nil, defs, r)
+									subCmd, cmdArgs = "fireworks-mode", ex.genArgs(defs, r)
 								})
 
 								It("correctly calls usb device", func() {
@@ -428,7 +433,7 @@ var _ = Describe("cmd package", func() {
 							func(ex *execT) {
 
 								BeforeEach(func() {
-									subCmd, cmdArgs = "marquee-mode", ex.genArgs(nil, defs, r)
+									subCmd, cmdArgs = "marquee-mode", ex.genArgs(defs, r)
 								})
 
 								It("correctly calls usb device", func() {
@@ -462,7 +467,7 @@ var _ = Describe("cmd package", func() {
 							func(ex *execT) {
 
 								BeforeEach(func() {
-									subCmd, cmdArgs = "off-mode", ex.genArgs(nil, defs, r)
+									subCmd, cmdArgs = "off-mode", ex.genArgs(defs, r)
 								})
 
 								It("correctly calls usb device", func() {
@@ -492,7 +497,7 @@ var _ = Describe("cmd package", func() {
 							func(ex *execT) {
 
 								BeforeEach(func() {
-									subCmd, cmdArgs = "rainbow-mode", ex.genArgs(nil, defs, r)
+									subCmd, cmdArgs = "rainbow-mode", ex.genArgs(defs, r)
 								})
 
 								It("correctly calls usb device", func() {
@@ -525,7 +530,7 @@ var _ = Describe("cmd package", func() {
 							func(ex *execT) {
 
 								BeforeEach(func() {
-									subCmd, cmdArgs = "raindrop-mode", ex.genArgs(nil, defs, r)
+									subCmd, cmdArgs = "raindrop-mode", ex.genArgs(defs, r)
 								})
 
 								It("correctly calls usb device", func() {
@@ -560,7 +565,7 @@ var _ = Describe("cmd package", func() {
 							func(ex *execT) {
 
 								BeforeEach(func() {
-									subCmd, cmdArgs = "random-mode", ex.genArgs(nil, defs, r)
+									subCmd, cmdArgs = "random-mode", ex.genArgs(defs, r)
 								})
 
 								It("correctly calls usb device", func() {
@@ -596,7 +601,7 @@ var _ = Describe("cmd package", func() {
 							func(ex *execT) {
 
 								BeforeEach(func() {
-									subCmd, cmdArgs = "ripple-mode", ex.genArgs(nil, defs, r)
+									subCmd, cmdArgs = "ripple-mode", ex.genArgs(defs, r)
 								})
 
 								It("correctly calls usb device", func() {
@@ -632,7 +637,7 @@ var _ = Describe("cmd package", func() {
 							func(ex *execT) {
 
 								BeforeEach(func() {
-									subCmd, cmdArgs = "wave-mode", ex.genArgs(nil, defs, r)
+									subCmd, cmdArgs = "wave-mode", ex.genArgs(defs, r)
 								})
 
 								It("correctly calls usb device", func() {
@@ -668,7 +673,7 @@ var _ = Describe("cmd package", func() {
 							func(ex *execT) {
 
 								BeforeEach(func() {
-									subCmd, cmdArgs = "single-color-mode", ex.genArgs(nil, defs, r)
+									subCmd, cmdArgs = "single-color-mode", ex.genArgs(defs, r)
 								})
 
 								It("correctly calls usb device", func() {
@@ -776,7 +781,7 @@ var _ = Describe("cmd package", func() {
 					func(command string) {
 
 						BeforeEach(func() {
-							subCmd, cmdArgs = command, ex.genArgs(nil, zeroDefaults(), r)
+							subCmd, cmdArgs = command, ex.genArgs(zeroDefaults(), r)
 						})
 
 						It("fails and correctly repots the error", func() {
@@ -808,7 +813,7 @@ var _ = Describe("cmd package", func() {
 					func(command string) {
 
 						BeforeEach(func() {
-							subCmd, cmdArgs = command, ex.genArgs(nil, zeroDefaults(), r)
+							subCmd, cmdArgs = command, ex.genArgs(zeroDefaults(), r)
 						})
 
 						It("fails and correctly repots the error", func() {
@@ -838,7 +843,7 @@ var _ = Describe("cmd package", func() {
 					func(command string) {
 
 						BeforeEach(func() {
-							subCmd, cmdArgs = command, ex.genArgs(nil, zeroDefaults(), r)
+							subCmd, cmdArgs = command, ex.genArgs(zeroDefaults(), r)
 						})
 
 						It("fails and correctly repots the error", func() {
@@ -866,7 +871,7 @@ var _ = Describe("cmd package", func() {
 					func(command string) {
 
 						BeforeEach(func() {
-							subCmd, cmdArgs = command, ex.genArgs(nil, zeroDefaults(), r)
+							subCmd, cmdArgs = command, ex.genArgs(zeroDefaults(), r)
 						})
 
 						It("fails and correctly repots the error", func() {
@@ -891,7 +896,7 @@ var _ = Describe("cmd package", func() {
 					func(command string) {
 
 						BeforeEach(func() {
-							subCmd, cmdArgs = command, ex.genArgs(nil, zeroDefaults(), r)
+							subCmd, cmdArgs = command, ex.genArgs(zeroDefaults(), r)
 						})
 
 						It("fails and correctly repots the error", func() {
@@ -914,7 +919,7 @@ var _ = Describe("cmd package", func() {
 					func(command string) {
 
 						BeforeEach(func() {
-							subCmd, cmdArgs = command, ex.genArgs(nil, zeroDefaults(), r)
+							subCmd, cmdArgs = command, ex.genArgs(zeroDefaults(), r)
 						})
 
 						It("fails and correctly repots the error", func() {
@@ -940,7 +945,7 @@ var _ = Describe("cmd package", func() {
 					func(command string) {
 
 						BeforeEach(func() {
-							subCmd, cmdArgs = command, ex.genArgs(nil, zeroDefaults(), r)
+							subCmd, cmdArgs = command, ex.genArgs(zeroDefaults(), r)
 						})
 
 						It("fails and correctly repots the error", func() {
@@ -973,7 +978,7 @@ var _ = Describe("cmd package", func() {
 					func(command string) {
 
 						BeforeEach(func() {
-							subCmd, cmdArgs = command, ex.genArgs(nil, zeroDefaults(), r)
+							subCmd, cmdArgs = command, ex.genArgs(zeroDefaults(), r)
 						})
 
 						It("fails and correctly repots the error", func() {
@@ -1007,7 +1012,7 @@ var _ = Describe("cmd package", func() {
 					func(command string) {
 
 						BeforeEach(func() {
-							subCmd, cmdArgs = command, ex.genArgs(nil, zeroDefaults(), r)
+							subCmd, cmdArgs = command, ex.genArgs(zeroDefaults(), r)
 						})
 
 						It("fails and correctly repots the error", func() {
@@ -1044,7 +1049,7 @@ var _ = Describe("cmd package", func() {
 					func(command string) {
 
 						BeforeEach(func() {
-							subCmd, cmdArgs = command, ex.genArgs(nil, zeroDefaults(), r)
+							subCmd, cmdArgs = command, ex.genArgs(zeroDefaults(), r)
 						})
 
 						It("fails and correctly repots the error", func() {
@@ -1081,7 +1086,7 @@ var _ = Describe("cmd package", func() {
 					func(command string) {
 
 						BeforeEach(func() {
-							subCmd, cmdArgs = command, ex.genArgs(nil, zeroDefaults(), r)
+							subCmd, cmdArgs = command, ex.genArgs(zeroDefaults(), r)
 						})
 
 						It("fails and correctly repots the error", func() {
@@ -1120,7 +1125,7 @@ var _ = Describe("cmd package", func() {
 					func(command string) {
 
 						BeforeEach(func() {
-							subCmd, cmdArgs = command, ex.genArgs(nil, zeroDefaults(), r)
+							subCmd, cmdArgs = command, ex.genArgs(zeroDefaults(), r)
 						})
 
 						It("fails and correctly repots the error", func() {
@@ -1159,7 +1164,7 @@ var _ = Describe("cmd package", func() {
 					func(command string) {
 
 						BeforeEach(func() {
-							subCmd, cmdArgs = command, ex.genArgs(nil, zeroDefaults(), r)
+							subCmd, cmdArgs = command, ex.genArgs(zeroDefaults(), r)
 						})
 
 						It("fails and correctly repots the error", func() {
@@ -1198,7 +1203,7 @@ var _ = Describe("cmd package", func() {
 					func(command string) {
 
 						BeforeEach(func() {
-							subCmd, cmdArgs = command, ex.genArgs(nil, zeroDefaults(), r)
+							subCmd, cmdArgs = command, ex.genArgs(zeroDefaults(), r)
 
 							if command == "set-color" {
 								cmdArgs = append(cmdArgs, "-c", "1")
@@ -1226,7 +1231,7 @@ var _ = Describe("cmd package", func() {
 					func(command string) {
 
 						BeforeEach(func() {
-							subCmd, cmdArgs = command, ex.genArgs(nil, zeroDefaults(), r)
+							subCmd, cmdArgs = command, ex.genArgs(zeroDefaults(), r)
 
 							if command == "set-color" {
 								cmdArgs = append(cmdArgs, "-c", "1")
@@ -1254,7 +1259,7 @@ var _ = Describe("cmd package", func() {
 					func(command string) {
 
 						BeforeEach(func() {
-							subCmd, cmdArgs = command, ex.genArgs(nil, zeroDefaults(), r)
+							subCmd, cmdArgs = command, ex.genArgs(zeroDefaults(), r)
 
 							if command == "set-color" {
 								cmdArgs = append(cmdArgs, "-c", "1")
@@ -1283,7 +1288,7 @@ var _ = Describe("cmd package", func() {
 					func(command string) {
 
 						BeforeEach(func() {
-							subCmd, cmdArgs = command, ex.genArgs(nil, zeroDefaults(), r)
+							subCmd, cmdArgs = command, ex.genArgs(zeroDefaults(), r)
 
 							if command == "set-color" {
 								cmdArgs = append(cmdArgs, "-c", "1")
@@ -1312,7 +1317,7 @@ var _ = Describe("cmd package", func() {
 					func(command string) {
 
 						BeforeEach(func() {
-							subCmd, cmdArgs = command, ex.genArgs(nil, zeroDefaults(), r)
+							subCmd, cmdArgs = command, ex.genArgs(zeroDefaults(), r)
 
 							if command == "set-color" {
 								cmdArgs = append(cmdArgs, "-c", "1")
@@ -1364,7 +1369,7 @@ var _ = Describe("cmd package", func() {
 						BeforeEach(func() {
 							colorNum = r.Intn(7) + 1
 
-							subCmd, cmdArgs = command, ex.genArgs(nil, zeroDefaults(), r)
+							subCmd, cmdArgs = command, ex.genArgs(zeroDefaults(), r)
 
 							newConf := map[string]any{
 								params.PredefinedColorProp: map[string]any{
@@ -1409,7 +1414,7 @@ var _ = Describe("cmd package", func() {
 
 						BeforeEach(func() {
 
-							subCmd, cmdArgs = command, ex.genArgs(nil, zeroDefaults(), r)
+							subCmd, cmdArgs = command, ex.genArgs(zeroDefaults(), r)
 
 							newConf := map[string]any{
 								"singleModeColor": "#FF55",
@@ -1451,6 +1456,7 @@ var _ = Describe("cmd package", func() {
 			func(callNum int, callCmd string, callArgs ...string) {
 
 				BeforeEach(func() {
+					//nolint:err113
 					dev.ctlRtnError = fmt.Errorf("control transfer error %s", uuid.New())
 					dev.ctlRtnErrorAtCall = callNum - 1
 					subCmd, cmdArgs = callCmd, callArgs
@@ -1523,6 +1529,7 @@ var _ = Describe("cmd package", func() {
 			func(callNum int, callCmd string, callArgs ...string) {
 
 				BeforeEach(func() {
+					//nolint:err113
 					dev.getBulkWriteRtnError = fmt.Errorf("get bulk write error %s", uuid.New())
 					dev.getBulkWriteRtnErrorAtCall = callNum
 					subCmd, cmdArgs = callCmd, callArgs
@@ -1551,6 +1558,7 @@ var _ = Describe("cmd package", func() {
 			func(callNum int, callCmd string, callArgs ...string) {
 
 				BeforeEach(func() {
+					//nolint:err113
 					dev.bulkWriteRtnError = fmt.Errorf("get bulk write error %s", uuid.New())
 					dev.bulkWriteRtnErrorAtCall = callNum
 					subCmd, cmdArgs = callCmd, callArgs
@@ -1579,6 +1587,7 @@ var _ = Describe("cmd package", func() {
 			func(callCmd string, callArgs ...string) {
 
 				BeforeEach(func() {
+					//nolint:err113
 					findDevCall.rtnError = fmt.Errorf("find device error %s", uuid.New())
 					subCmd, cmdArgs = callCmd, callArgs
 				})
@@ -1621,6 +1630,7 @@ var _ = Describe("cmd package", func() {
 			func(callCmd string, callArgs ...string) {
 
 				BeforeEach(func() {
+					//nolint:err113
 					readConfigCall.rtnError = fmt.Errorf("read config error %s", uuid.New())
 					subCmd, cmdArgs = callCmd, callArgs
 				})

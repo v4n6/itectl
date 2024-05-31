@@ -14,23 +14,23 @@ import (
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
-// randomLabel is label to mark random value in tests description
+// randomLabel is label to mark random value in tests description.
 const randomLabel = "<rnd>"
 
-// true/false string representations
+// true/false string representations.
 const (
 	trueStr  = "true"
 	falseStr = "false"
 )
 
-// namedColors configured named colors
+// namedColors configured named colors.
 var namedColors = map[string]string{
 	"NONAME:Color": "ABC",
 	"colour.cyAN":  "#112233",
 	"123-yes":      "0XddEEFf",
 }
 
-// named colors viper config
+// named colors viper config.
 var namedColorsConfig = map[string]any{}
 
 func init() {
@@ -40,7 +40,7 @@ func init() {
 	}
 }
 
-// all possible flags
+// all possible flags.
 var (
 	brightnessFlagAll     = []string{"-" + params.BrightnessShortFlag, "--" + params.BrightnessProp}
 	speedFlagAll          = []string{"-" + params.SpeedShortFlag, "--" + params.SpeedProp}
@@ -69,7 +69,7 @@ var (
 	configFileFlagAll = []string{"--" + params.ConfigFileFlag}
 )
 
-// all flag values to test
+// all flag values to test.
 var (
 	brightnessAll     = []string{"0", randomLabel, "50"}
 	speedAll          = []string{"0", randomLabel, "10"}
@@ -127,7 +127,7 @@ type defaultsT struct {
 	deviceAddress int
 }
 
-// zeroDefaults creates and returns default flags values initialized with default flag values
+// zeroDefaults creates and returns default flags values initialized with default flag values.
 func zeroDefaults() *defaultsT {
 	return &defaultsT{
 		brightness: params.BrightnessDefault,
@@ -151,7 +151,7 @@ func zeroDefaults() *defaultsT {
 	}
 }
 
-// flag type represents cmdline flag
+// flag type represents cmdline flag.
 type flag struct {
 	name  string
 	value string
@@ -189,11 +189,11 @@ type execT struct {
 	configFile *flag
 }
 
-// genArgs generates cmd line arguments based on execT values
-func (e *execT) genArgs(args []string, conf *defaultsT, r *rand.Rand) []string {
+// genArgs generates cmd line arguments based on execT values.
+func (e *execT) genArgs(conf *defaultsT, r *rand.Rand) []string {
 	e.conf = conf
 
-	args = e.genFlagArgs(args, e.brightness, func() string {
+	args := e.genFlagArgs(nil, e.brightness, func() string {
 		return strconv.Itoa(r.Intn(ite8291.BrightnessMaxValue))
 	})
 
@@ -206,7 +206,8 @@ func (e *execT) genArgs(args []string, conf *defaultsT, r *rand.Rand) []string {
 	})
 
 	args = e.genFlagArgs(args, e.customColorNum, func() string {
-		return strconv.Itoa(ite8291.CustomColorNumMinValue + r.Intn(ite8291.CustomColorNumMaxValue-ite8291.CustomColorNumMinValue))
+		return strconv.Itoa(ite8291.CustomColorNumMinValue +
+			r.Intn(ite8291.CustomColorNumMaxValue-ite8291.CustomColorNumMinValue))
 	})
 
 	args = e.genFlagArgs(args, e.direction, nil)
@@ -337,9 +338,9 @@ func getByteBool(flag *flag, defValue bool) byte {
 
 	if b {
 		return 1
-	} else {
-		return 0
 	}
+
+	return 0
 }
 
 func (e *execT) SetBrightness(flag *flag) {
@@ -586,7 +587,7 @@ func (e *execT) ConfigFile() string {
 	return e.configFile.value
 }
 
-// String returns test case label
+// String returns test case label.
 func (e *execT) String() string {
 	b := &strings.Builder{}
 	b.WriteString("`flags:")
@@ -641,7 +642,7 @@ func (e *execT) String() string {
 	return b.String()
 }
 
-// execsT type represents collection of command invocations
+// execsT type represents collection of command invocations.
 type execsT []*execT
 
 // newExecs creates collection od command invocations with one initial invocation without any flags.
@@ -841,7 +842,7 @@ func (exs execsT) RequiredConfigFile(values ...string) execsT {
 	return exs.addFlagWithValue(false, configFileFlagAll, (*execT).SetConfigFile, values...)
 }
 
-// entries returns test cases as ginkgo test entries
+// entries returns test cases as ginkgo test entries.
 func (exs execsT) entries() []TableEntry {
 
 	entries := []TableEntry{}

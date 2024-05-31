@@ -28,7 +28,7 @@ import (
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
-// offModeDescription - off-mode command description
+// offModeDescription - off-mode command description.
 const offModeDescription = "Turn the keyboard backlight off."
 
 // newOffModeCmd creates, initializes and returns command

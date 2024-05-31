@@ -28,7 +28,7 @@ import (
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
-// rippleModeDescription - ripple-mode command description
+// rippleModeDescription - ripple-mode command description.
 const rippleModeDescription = "Set keyboard backlight to 'ripple' mode."
 
 // newRippleModeCmd creates, initializes and returns command

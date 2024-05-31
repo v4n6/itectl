@@ -28,7 +28,7 @@ import (
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
-// setBrightnessDescription - set-brightness command description
+// setBrightnessDescription - set-brightness command description.
 const setBrightnessDescription = "Set keyboard backlight brightness."
 
 // newSetBrightnessCmd creates, initializes and returns command

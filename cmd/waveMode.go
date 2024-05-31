@@ -28,7 +28,7 @@ import (
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
-// waveModeDescription - wave-mode command description
+// waveModeDescription - wave-mode command description.
 const waveModeDescription = "Set keyboard backlight to 'wave' mode."
 
 // newWaveModeCmd creates, initializes and returns command

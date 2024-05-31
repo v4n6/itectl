@@ -12,27 +12,27 @@ import (
 	"github.com/spf13/viper"
 )
 
-// viper configuration file properties
+// viper configuration file properties.
 const (
-	// ConfigName is name of configuration file(s) used by viper
+	// ConfigName is name of configuration file(s) used by viper.
 	ConfigName = "itectl"
-	// ConfigType is type of configuration file(s) used by viper
+	// ConfigType is type of configuration file(s) used by viper.
 	ConfigType = "yaml"
 )
 
 const (
-	// defaultModeProp is viper config property name for implicit mode
+	// defaultModeProp is viper config property name for implicit mode.
 	defaultModeProp = "mode"
-	// ConfigFileFlag is name of the viper config file flag
+	// ConfigFileFlag is name of the viper config file flag.
 	ConfigFileFlag = "config"
-	// configurationWarning is warning about possibility that value can be retrieved from viper configuration
+	// configurationWarning is warning about possibility that value can be retrieved from viper configuration.
 	configurationWarning = "The default value can be overwritten by global and/or user configuration!"
 )
 
-// InvalidOptionValueError is an error indicating that a property has an invalid value.
-var InvalidOptionValueError = errors.New("invalid option value")
+// ErrInvalidOptVal is an error indicating that a property has an invalid value.
+var ErrInvalidOptVal = errors.New("invalid option value")
 
-// DefaultMode returns name of configured implicit mode without "-mode" suffix
+// DefaultMode returns name of configured implicit mode without "-mode" suffix.
 func DefaultMode(v *viper.Viper) string {
 	return v.GetString(defaultModeProp)
 }
@@ -41,7 +41,7 @@ func DefaultMode(v *viper.Viper) string {
 func validateMinMaxUint8Value(name string, val, valMin, valMax uint8) error {
 
 	if valMax < val || val < valMin {
-		return fmt.Errorf("%w \"%d\" for %q; expected [%d,%d]", InvalidOptionValueError, val, name, valMin, valMax)
+		return fmt.Errorf("%w \"%d\" for %q; expected [%d,%d]", ErrInvalidOptVal, val, name, valMin, valMax)
 	}
 
 	return nil
@@ -51,7 +51,7 @@ func validateMinMaxUint8Value(name string, val, valMin, valMax uint8) error {
 func validateMaxUint8Value(name string, val, valMax uint8) error {
 
 	if valMax < val {
-		return fmt.Errorf("%w \"%d\" for %q; expected [%d,%d]", InvalidOptionValueError, val, name, 0, valMax)
+		return fmt.Errorf("%w \"%d\" for %q; expected [%d,%d]", ErrInvalidOptVal, val, name, 0, valMax)
 	}
 
 	return nil
@@ -132,7 +132,7 @@ func ReadConfig(cmd *cobra.Command, v *viper.Viper, cfgFile string) error {
 	// merges all default config files
 	for _, dir := range slices.Concat(xdg.ConfigDirs, []string{xdg.ConfigHome}) {
 
-		if err := mergeConfig(cmd, v, dir); err != nil {
+		if err := mergeConfig(v, dir); err != nil {
 			fmt.Fprintf(cmd.ErrOrStderr(), "Warning: %v\n", err) // print and ignore errors
 		}
 	}
@@ -144,14 +144,15 @@ func ReadConfig(cmd *cobra.Command, v *viper.Viper, cfgFile string) error {
 	return nil
 }
 
-// mergeConfig merges configuration found in specified dir into provided via v param viper instance
-func mergeConfig(cmd *cobra.Command, v *viper.Viper, dir string) error {
+// mergeConfig merges configuration found in specified dir into provided via v param viper instance.
+func mergeConfig(v *viper.Viper, dir string) error {
 
 	v_ := viper.New() // local viper instance
 
 	if err := readInConfig(v_, "", dir); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-			return fmt.Errorf( // return error if config file was found and error occured
+		var fileNotFoundError viper.ConfigFileNotFoundError
+		if !errors.As(err, &fileNotFoundError) {
+			return fmt.Errorf( // return error if config file was found and error occurred
 				"error reading configuration %q at %q: %w", ConfigName, dir, err)
 		}
 	}

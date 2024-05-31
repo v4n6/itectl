@@ -28,7 +28,7 @@ import (
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
-// fireworksModeDescription - fireworks-mode command description
+// fireworksModeDescription - fireworks-mode command description.
 const fireworksModeDescription = "Set keyboard backlight to 'fireworks' mode."
 
 // newFireworksModeCmd creates, initializes and returns command

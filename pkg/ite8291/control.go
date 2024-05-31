@@ -143,14 +143,16 @@ func (c *Controller) controlReceive(data []byte) error {
 }
 
 // SetEffect sets ite8291r3 effect and its attributes
-func (c *Controller) SetEffect(cntrl, effect, speed, brightness, colorNum, reactive_or_direction byte, save bool) error {
+func (c *Controller) SetEffect(cntrl, effect, speed, brightness, colorNum,
+	reactOrDiv byte, save bool) error {
 
-	return c.ControlSend([]byte{SetEffectCommand, cntrl, effect, speed, brightness, colorNum, reactive_or_direction, bool2Byte(save)})
+	return c.ControlSend([]byte{SetEffectCommand, cntrl, effect, speed, brightness, colorNum,
+		reactOrDiv, bool2Byte(save)})
 }
 
 // SetEffect sets ite8291r3 reactive effect and its attributes
-func (c *Controller) setEffectWithReactive(cntrl, effect, speed, brightness, colorNum byte, reactive, save bool) error {
-	return c.SetEffect(cntrl, effect, speed, brightness, colorNum, bool2Byte(reactive), save)
+func (c *Controller) setEffectWithReactive(effect, speed, brightness, colorNum byte, reactive, save bool) error {
+	return c.SetEffect(SetEffectOp, effect, speed, brightness, colorNum, bool2Byte(reactive), save)
 }
 
 // SetOffMode switches ite8291r3 keyboard backlight off
@@ -200,13 +202,13 @@ func (c *Controller) GetBrightness() (brightness byte, err error) {
 // SetAuroraMode sets ite8291r3 keyboard backlight controller to 'aurora' effect
 func (c *Controller) SetAuroraMode(speed, brightness, colorNum byte, reactive, save bool) error {
 
-	return c.setEffectWithReactive(SetEffectOp, AuroraEffect, speed, brightness, colorNum, reactive, save)
+	return c.setEffectWithReactive(AuroraEffect, speed, brightness, colorNum, reactive, save)
 }
 
 // SetBreathingMode sets ite8291r3 keyboard backlight controller to 'breathing' effect
 func (c *Controller) SetBreathingMode(speed, brightness, colorNum byte, save bool) error {
 
-	return c.setEffectWithReactive(SetEffectOp, BreathingEffect, speed, brightness, colorNum, false, save)
+	return c.setEffectWithReactive(BreathingEffect, speed, brightness, colorNum, false, save)
 }
 
 // SetFireworksMode sets ite8291r3 keyboard backlight to 'fireworks' effect.
@@ -217,7 +219,7 @@ func (c *Controller) SetBreathingMode(speed, brightness, colorNum byte, save boo
 // whether to save effect in the controller
 func (c *Controller) SetFireworksMode(speed, brightness, colorNum byte, reactive, save bool) error {
 
-	return c.setEffectWithReactive(SetEffectOp, FireworksEffect, speed, brightness, colorNum, reactive, save)
+	return c.setEffectWithReactive(FireworksEffect, speed, brightness, colorNum, reactive, save)
 }
 
 // SetMarqueeMode sets ite8291r3 keyboard backlight to 'marquee' effect.
@@ -226,7 +228,7 @@ func (c *Controller) SetFireworksMode(speed, brightness, colorNum byte, reactive
 // whether to save effect in the controller
 func (c *Controller) SetMarqueeMode(speed, brightness byte, save bool) error {
 
-	return c.setEffectWithReactive(SetEffectOp, MarqueeEffect, speed, brightness, 0, false, save)
+	return c.setEffectWithReactive(MarqueeEffect, speed, brightness, 0, false, save)
 }
 
 // SetRainbowMode sets ite8291r3 keyboard backlight to 'rainbow' effect.
@@ -235,7 +237,7 @@ func (c *Controller) SetMarqueeMode(speed, brightness byte, save bool) error {
 // whether to save effect in the controller
 func (c *Controller) SetRainbowMode(brightness byte, save bool) error {
 
-	return c.setEffectWithReactive(SetEffectOp, RainbowEffect, 0, brightness, 0, false, save)
+	return c.setEffectWithReactive(RainbowEffect, 0, brightness, 0, false, save)
 }
 
 // SetRaindropMode sets ite8291r3 keyboard backlight to 'raindrop' effect.
@@ -245,7 +247,7 @@ func (c *Controller) SetRainbowMode(brightness byte, save bool) error {
 // whether to save effect in the controller
 func (c *Controller) SetRaindropMode(speed, brightness, colorNum byte, save bool) error {
 
-	return c.setEffectWithReactive(SetEffectOp, RaindropEffect, speed, brightness, colorNum, false, save)
+	return c.setEffectWithReactive(RaindropEffect, speed, brightness, colorNum, false, save)
 }
 
 // SetRandomMode sets ite8291r3 keyboard backlight to 'random' effect.
@@ -256,7 +258,7 @@ func (c *Controller) SetRaindropMode(speed, brightness, colorNum byte, save bool
 // whether to save effect in the controller
 func (c *Controller) SetRandomMode(speed, brightness, colorNum byte, reactive, save bool) error {
 
-	return c.setEffectWithReactive(SetEffectOp, RandomEffect, speed, brightness, colorNum, reactive, save)
+	return c.setEffectWithReactive(RandomEffect, speed, brightness, colorNum, reactive, save)
 }
 
 // SetRippleMode sets ite8291r3 keyboard backlight to 'ripple' effect.
@@ -267,7 +269,7 @@ func (c *Controller) SetRandomMode(speed, brightness, colorNum byte, reactive, s
 // whether to save effect in the controller
 func (c *Controller) SetRippleMode(speed, brightness, colorNum byte, reactive, save bool) error {
 
-	return c.setEffectWithReactive(SetEffectOp, RippleEffect, speed, brightness, colorNum, reactive, save)
+	return c.setEffectWithReactive(RippleEffect, speed, brightness, colorNum, reactive, save)
 }
 
 // SetWaveMode sets ite8291r3 keyboard backlight to 'wave' effect.
@@ -288,7 +290,7 @@ func (c *Controller) SetWaveMode(speed, brightness byte, direction Direction, sa
 // whether to save effect in the controller
 func (c *Controller) setUserMode(brightness byte, save bool) error {
 
-	return c.setEffectWithReactive(SetEffectOp, UserEffect, 0, brightness, 0, false, save)
+	return c.setEffectWithReactive(UserEffect, 0, brightness, 0, false, save)
 }
 
 func (c *Controller) setRowIndex(idx byte) error {

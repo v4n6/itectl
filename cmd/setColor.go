@@ -30,7 +30,7 @@ import (
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
-// setColorDescription - set-color command description
+// setColorDescription - set-color command description.
 const setColorDescription = "Set keyboard backlight customizable predefined color."
 
 // newSetColorCmd creates, initializes and returns command

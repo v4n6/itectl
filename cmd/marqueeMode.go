@@ -28,7 +28,7 @@ import (
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
-// auroraModeDescription - marquee-mode command description
+// auroraModeDescription - marquee-mode command description.
 const marqueeModeDescription = "Set keyboard backlight to 'marquee' mode."
 
 // newMarqueeModeCmd creates, initializes and returns command

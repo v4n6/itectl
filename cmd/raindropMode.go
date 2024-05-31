@@ -28,7 +28,7 @@ import (
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
-// raindropModeDescription - raindrop-mode command description
+// raindropModeDescription - raindrop-mode command description.
 const raindropModeDescription = "Set keyboard backlight to 'raindrop' mode."
 
 // newRaindropModeCmd creates, initializes and returns command

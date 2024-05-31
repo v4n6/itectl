@@ -8,21 +8,21 @@ import (
 )
 
 const (
-	// DeviceBusDefault is default value of device usb bus
+	// DeviceBusDefault is default value of device usb bus.
 	DeviceBusDefault = 0
-	// deviceBusDefault is default value of device usb address
+	// deviceBusDefault is default value of device usb address.
 	DeviceAddressDefault = 0
 )
 
 const (
-	// deviceBusProp is name of the device bus configuration property
+	// deviceBusProp is name of the device bus configuration property.
 	deviceBusProp = "device.bus"
-	// DeviceBusFlag is name of the device bus flag
+	// DeviceBusFlag is name of the device bus flag.
 	DeviceBusFlag = "device-bus"
 
-	// deviceAddressProp is name of the device address configuration property
+	// deviceAddressProp is name of the device address configuration property.
 	deviceAddressProp = "device.address"
-	// DeviceAddressFlag is name of the device address flag
+	// DeviceAddressFlag is name of the device address flag.
 	DeviceAddressFlag = "device-address"
 )
 
@@ -31,11 +31,11 @@ const (
 func AddDevice(cmd *cobra.Command, v *viper.Viper) {
 
 	cmd.PersistentFlags().Uint(DeviceBusFlag, DeviceBusDefault,
-		fmt.Sprintf("Bus number of the keyboard backlight device. %s", configurationWarning))
+		"Bus number of the keyboard backlight device. "+configurationWarning)
 	bindAndValidate(cmd, v, DeviceBusFlag, deviceBusProp, nil)
 
 	cmd.PersistentFlags().Uint(DeviceAddressFlag, DeviceAddressDefault,
-		fmt.Sprintf("Address of the keyboard backlight device. %s", configurationWarning))
+		"Address of the keyboard backlight device. "+configurationWarning)
 	bindAndValidate(cmd, v, DeviceAddressFlag, deviceAddressProp, nil)
 }
 
@@ -61,7 +61,7 @@ func Device(v *viper.Viper) (useDevice bool,
 		if deviceAddress > 0 {
 			return false, 0, 0,
 				fmt.Errorf("%w device bus number missing for \"--%s\" (either configured or specified explicitly)",
-					InvalidOptionValueError, DeviceBusFlag)
+					ErrInvalidOptVal, DeviceBusFlag)
 		}
 
 		return false, 0, 0, nil // device is not set
@@ -69,5 +69,5 @@ func Device(v *viper.Viper) (useDevice bool,
 
 	return false, 0, 0,
 		fmt.Errorf("%w device address missing for \"--%s\" (either configured or specified explicitly)",
-			InvalidOptionValueError, DeviceAddressFlag)
+			ErrInvalidOptVal, DeviceAddressFlag)
 }

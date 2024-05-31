@@ -5,8 +5,8 @@ import (
 	"fmt"
 )
 
-// InvalidColorFormatError error signaling invalid format of color text representation.
-var InvalidColorFormatError = errors.New("invalid color format")
+// ErrInvalidColorFormat error signaling invalid format of color text representation.
+var ErrInvalidColorFormat = errors.New("invalid color format")
 
 // SupportedColorStringFormats provides supported color text formats.
 var SupportedColorStringFormats = []string{
@@ -42,12 +42,14 @@ func FromRGB(rgb uint32) *Color {
 
 // ParseColor parses s to Color.
 // It accepts following formats 0xHHHHHH,#xHHHHHH,#HHHHHH,HHHHHH,#HHH,HHH.
+//
+//nolint:funlen,cyclop
 func ParseColor(s string) (*Color, error) {
 
 	var i, l = 0, len(s)
 
 	newErr := func() error {
-		return fmt.Errorf("%w: expected one of 0xHHHHHH,#xHHHHHH,#HHHHHH,HHHHHH,#HHH,HHH was %q", InvalidColorFormatError, s)
+		return fmt.Errorf("%w: expected one of 0xHHHHHH,#xHHHHHH,#HHHHHH,HHHHHH,#HHH,HHH was %q", ErrInvalidColorFormat, s)
 	}
 
 	switch l {

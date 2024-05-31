@@ -37,18 +37,17 @@ var PredefinedColorsDefault []string = []string{
 func AddReset(cmd *cobra.Command, v *viper.Viper) {
 
 	cmd.PersistentFlags().Bool(ResetProp, ResetDefault,
-		fmt.Sprintf(
-			"Reset the controller customizable predefined colors to their corresponding configured/default values. %s",
-			configurationWarning))
+		"Reset the controller customizable predefined colors to their corresponding configured/default values. "+
+			configurationWarning)
 	bindAndValidate(cmd, v, ResetProp, ResetProp, nil)
 }
 
-// Reset returns value of reset property
+// Reset returns value of reset property.
 func Reset(v *viper.Viper) bool {
 	return v.GetBool(ResetProp)
 }
 
-// PredefinedColor returns color of i-th predefined color
+// PredefinedColor returns color of i-th predefined color.
 func PredefinedColor(v *viper.Viper, i int) (color *ite8291.Color, err error) {
 
 	val := v.GetString(fmt.Sprintf(predefinedColorPropTemplate, PredefinedColorProp, i))
@@ -63,7 +62,7 @@ func PredefinedColor(v *viper.Viper, i int) (color *ite8291.Color, err error) {
 	// it isn't color name -> try as rgb
 	if color, err = ite8291.ParseColor(val); err != nil {
 		return nil, fmt.Errorf("%w for predefined color #%d: %w",
-			InvalidOptionValueError, i, err)
+			ErrInvalidOptVal, i, err)
 	}
 
 	return color, nil

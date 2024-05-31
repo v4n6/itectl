@@ -30,7 +30,7 @@ import (
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
-// singleColorModeDescription - single-color-mode command description
+// singleColorModeDescription - single-color-mode command description.
 const singleColorModeDescription = "Set keyboard backlight to 'single color' mode"
 
 // newSingleColorModeCmd creates, initializes and returns command

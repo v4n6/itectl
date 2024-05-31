@@ -72,19 +72,20 @@ func assertControlCall(dev *deviceStubT, predefinedColors []string, doReset bool
 	return args
 }
 
-// assertGetBulkWriteCall asserts that GetBulkWrite method was called correctly
+// assertGetBulkWriteCall asserts that GetBulkWrite method was called correctly.
 func assertGetBulkWriteCall(dev *deviceStubT, getBulkWriteCallNum int) {
 	GinkgoHelper()
-	Ω(dev.getBulkWriteCallNum).Should(Equal(getBulkWriteCallNum), "GetBulkWrite must be called %d times", getBulkWriteCallNum)
+	Ω(dev.getBulkWriteCallNum).Should(Equal(getBulkWriteCallNum),
+		"GetBulkWrite must be called %d times", getBulkWriteCallNum)
 }
 
-// assertBulkWriteCall asserts that Write function returned by GetBulkWrite was called correctly
+// assertBulkWriteCall asserts that Write function returned by GetBulkWrite was called correctly.
 func assertBulkWriteCall(dev *deviceStubT, bulkWriteCallNum int) {
 	GinkgoHelper()
 	Ω(dev.bulkWriteCallNum).Should(Equal(bulkWriteCallNum), "GetBulkWrite must be called %d times", bulkWriteCallNum)
 }
 
-// assertCommandOutput asserts that given msg was written to stdout and nothing was written to stderr
+// assertCommandOutput asserts that given msg was written to stdout and nothing was written to stderr.
 func assertCommandOutput(out, err *gbytes.Buffer, msg string) {
 	Ω(err.Contents()).Should(BeEmpty())
 	Ω(out.Contents()).Should(ContainSubstring(msg))
@@ -94,8 +95,10 @@ func assertCommandOutput(out, err *gbytes.Buffer, msg string) {
 func assertCloseCallAfter(dev *deviceStubT, ctlCallNum, getBulkWriterCallNum, bulkWriterCallNum int) {
 	Ω(dev.closeCallNum).Should(Equal(1), "invalid number of close calls")
 	Ω(dev.closePreCtlCallNum).Should(Equal(ctlCallNum), "invalid number of control calls preceding close call")
-	Ω(dev.closePreGetBulkWriteCallNum).Should(Equal(getBulkWriterCallNum), "invalid number of get bulk write calls preceding close call")
-	Ω(dev.closePreBulkWriteCallNum).Should(Equal(bulkWriterCallNum), "invalid number of bulk write calls preceding close call")
+	Ω(dev.closePreGetBulkWriteCallNum).Should(Equal(getBulkWriterCallNum),
+		"invalid number of get bulk write calls preceding close call")
+	Ω(dev.closePreBulkWriteCallNum).Should(Equal(bulkWriterCallNum),
+		"invalid number of bulk write calls preceding close call")
 }
 
 // assertDeviceNotCalled asserts no controller method was called.

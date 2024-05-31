@@ -28,7 +28,7 @@ import (
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
-// breathModeDescription - breath-mode command description
+// breathModeDescription - breath-mode command description.
 const breathModeDescription = "Set keyboard backlight to 'breathing' mode."
 
 // newBreathModeCmd creates, initializes and returns command

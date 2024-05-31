@@ -49,15 +49,15 @@ func colorNameToColor(name string, v *viper.Viper) (color *ite8291.Color, err er
 
 		color, err = ite8291.ParseColor(val)
 		if err != nil {
-			return nil, fmt.Errorf("%w %q for %q: %w", InvalidOptionValueError, name,
-				fmt.Sprintf("--%s", ColorNameFlag), err)
+			return nil, fmt.Errorf("%w %q for %q: %w", ErrInvalidOptVal, name,
+				"--"+ColorNameFlag, err)
 		}
 
 		return color, nil
 	}
 
-	return nil, fmt.Errorf("%w %q for %q is an unknown color name", InvalidOptionValueError, name,
-		fmt.Sprintf("--%s", ColorNameFlag))
+	return nil, fmt.Errorf("%w %q for %q is an unknown color name", ErrInvalidOptVal, name,
+		"--"+ColorNameFlag)
 }
 
 // addColorFlags adds color related flags to the provided cmd.
@@ -103,8 +103,8 @@ func addColorFlags(cmd *cobra.Command, v *viper.Viper, required bool) (red, gree
 		if len(rgb) > 0 {
 
 			if col, err = ite8291.ParseColor(rgb); err != nil {
-				return fmt.Errorf("%w %q for %q: %w", InvalidOptionValueError, rgb,
-					fmt.Sprintf("--%s", ColorRGBFlag), err)
+				return fmt.Errorf("%w %q for %q: %w", ErrInvalidOptVal, rgb,
+					"--"+ColorRGBFlag, err)
 			}
 		}
 
@@ -161,7 +161,7 @@ func AddSingleModeColor(cmd *cobra.Command, v *viper.Viper) (color func() *ite82
 			// it must be rgb
 			if *col, err = ite8291.ParseColor(c); err != nil {
 				return fmt.Errorf("%w %q for configured single mode color: %w",
-					InvalidOptionValueError, c, err)
+					ErrInvalidOptVal, c, err)
 			}
 		}
 

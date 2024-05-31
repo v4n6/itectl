@@ -25,16 +25,15 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
-// firmwareVersionDescription - firmware-version command description
+// firmwareVersionDescription - firmware-version command description.
 const firmwareVersionDescription = "Retrieve and print firmware version of the keyboard backlight controller."
 
 // newFirmwareVersionCmd creates, initializes and returns command
 // to retrieve and print keyboard backlight controller firmware version.
-func newFirmwareVersionCmd(v *viper.Viper, call ite8291Ctl) *cobra.Command {
+func newFirmwareVersionCmd(call ite8291Ctl) *cobra.Command {
 
 	return &cobra.Command{
 		Use:           "firmware-version",

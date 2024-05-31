@@ -28,7 +28,7 @@ import (
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
-// auroraModeDescription - aurora-mode command description
+// auroraModeDescription - aurora-mode command description.
 const auroraModeDescription = "Set keyboard backlight to 'aurora' mode."
 
 // newAuroraModeCmd creates, initializes and returns command

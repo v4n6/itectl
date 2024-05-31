@@ -28,7 +28,7 @@ import (
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
-// randomModeDescription - random-mode command description
+// randomModeDescription - random-mode command description.
 const randomModeDescription = "Set keyboard backlight to 'random' mode."
 
 // newRandomModeCmd creates, initializes and returns command

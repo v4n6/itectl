@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	// ColorNumDefault is color number property default value
+	// ColorNumDefault is color number property default value.
 	ColorNumDefault = ite8291.ColorRandom
 )
 
@@ -27,6 +27,7 @@ const (
 // and to validate its value.
 func AddColorNum(cmd *cobra.Command, v *viper.Viper) {
 
+	//nolint:lll
 	cmd.PersistentFlags().Uint8P(ColorNumFlag, ColorNumShortFlag, ColorNumDefault,
 		fmt.Sprintf(
 			"Number of the predfined color of keyboard backlight to use; min value %d, max value %d, 0 means no color, 1-7 customizable color, 8 random color. %s",
@@ -37,7 +38,7 @@ func AddColorNum(cmd *cobra.Command, v *viper.Viper) {
 	})
 }
 
-// ColorNum returns color number property value
+// ColorNum returns color number property value.
 func ColorNum(v *viper.Viper) byte {
 	return byte(v.GetUint(ColorNumProp))
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
-// SpeedDefault is default speed value
+// SpeedDefault is default speed value.
 const SpeedDefault = 5
 
 const (
@@ -32,7 +32,7 @@ func AddSpeed(cmd *cobra.Command, v *viper.Viper) {
 	})
 }
 
-// Speed returns speed property value
+// Speed returns speed property value.
 func Speed(v *viper.Viper) byte {
 	return byte(ite8291.SpeedMaxValue - v.GetUint(SpeedProp))
 }

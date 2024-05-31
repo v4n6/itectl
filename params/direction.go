@@ -2,10 +2,11 @@ package params
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/v4n6/itectl/pkg/ite8291"
-	"strings"
 )
 
 // DirectionDefault is default value of direction configuration property.
@@ -38,7 +39,7 @@ func ParseDirectionName(name string) (ite8291.Direction, error) {
 		return dir, nil
 	}
 	return 0, fmt.Errorf("%w %q for %q; expected one of %q",
-		InvalidOptionValueError, name,
+		ErrInvalidOptVal, name,
 		fmt.Sprintf("-%s, --%s", DirectionShortFlag, DirectionProp), directionNames)
 }
 

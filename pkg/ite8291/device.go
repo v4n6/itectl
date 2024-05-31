@@ -23,14 +23,14 @@ const endpointOutDirection libusb.EndpointDirection = 0
 // productIDs - supported product ids of ite8291r3 devices
 var productIDs = map[uint16]bool{0x6004: true, 0x6006: true, 0xCE00: true}
 
-// NoDeviceFoundError - error indicating that no ite8291r3 device found
-var NoDeviceFoundError = errors.New("no ite8291r3 device found")
+// ErrNoDevFound - error indicating that no ite8291r3 device found
+var ErrNoDevFound = errors.New("no ite8291r3 device found")
 
-// UnsupportedDeviceError - error indicating that a device with given bus and address is not an ite8291r3 device
-var UnsupportedDeviceError = errors.New("is not ite8291 device")
+// ErrUnsupportedDev - error indicating that a device with given bus and address is not an ite8291r3 device
+var ErrUnsupportedDev = errors.New("is not ite8291 device")
 
-// NoOutEndpointFoundError - error indicating that no out endpoint found at ite8291r3 device
-var NoOutEndpointFoundError = errors.New("no output endpoint found")
+// ErrNoOutEndpointFound - error indicating that no out endpoint found at ite8291r3 device
+var ErrNoOutEndpointFound = errors.New("no output endpoint found")
 
 // USBDevice type provides ite8291r3 usb device
 type USBDevice struct {
@@ -78,7 +78,7 @@ func (d *USBDevice) GetBulkWrite() (WriteFunc, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("%w", NoOutEndpointFoundError)
+	return nil, fmt.Errorf("%w", ErrNoOutEndpointFound)
 }
 
 // CheckDevice type provides function to check wether a given dev
@@ -120,7 +120,7 @@ func NewCheckDeviceByBusAddress(bus, address int) CheckDevice {
 		}
 
 		return false, fmt.Errorf("device (bus=%d,address=%d) %w",
-			bus, address, UnsupportedDeviceError)
+			bus, address, ErrUnsupportedDev)
 
 	}
 }
@@ -130,8 +130,10 @@ const targetInterfaceNumber = 1
 
 // LookupDevice traverses all usb devices and returns first found supported ite8291r3 device.
 // It uses given check function to decide whether a device is supported.
-// It returns pointer to found usbDevice or occured error.
+// It returns pointer to found usbDevice or occurred error.
 // LookupDevice returns instance of NoDeviceFoundError if no supported device found.
+//
+//nolint:cyclop
 func LookupDevice(ctx *libusb.Context, check CheckDevice) (usbDevice *USBDevice, err error) {
 
 	devs, err := ctx.DeviceList()
@@ -143,7 +145,7 @@ func LookupDevice(ctx *libusb.Context, check CheckDevice) (usbDevice *USBDevice,
 
 		var found bool
 		found, err = check(dev)
-		if errors.Is(err, UnsupportedDeviceError) {
+		if errors.Is(err, ErrUnsupportedDev) {
 			return nil, err // device found but it isn't an ite8291 device
 		}
 
@@ -178,10 +180,10 @@ func LookupDevice(ctx *libusb.Context, check CheckDevice) (usbDevice *USBDevice,
 
 	if err != nil {
 		// report not found error together with saved error
-		return nil, fmt.Errorf("%w: %w", NoDeviceFoundError, err)
+		return nil, fmt.Errorf("%w: %w", ErrNoDevFound, err)
 	}
 
-	return nil, fmt.Errorf("%w", NoDeviceFoundError)
+	return nil, fmt.Errorf("%w", ErrNoDevFound)
 }
 
 // FindDevice searches for a supported ite8291r3 device. check function decides whether a device is a supported one.
@@ -218,7 +220,7 @@ func FindDevice(pollInterval, timeout time.Duration, check CheckDevice) (usbDevi
 			return usbDevice, err
 		}
 
-		if err != nil && !errors.Is(err, NoDeviceFoundError) {
+		if err != nil && !errors.Is(err, ErrNoDevFound) {
 			_ = ctx.Close()
 			return nil, err
 		}

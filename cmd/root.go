@@ -22,7 +22,6 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"slices"
@@ -38,15 +37,15 @@ import (
 func Execute() {
 
 	cobra.CheckErr(
-		ExecuteCmd(os.Args[1:], os.Stdout, os.Stderr, findIteDevice, params.ReadConfig))
+		executeCmd(os.Args[1:], os.Stdout, os.Stderr, findIteDevice, params.ReadConfig))
 }
 
-// ExecuteCmd invokes the command provided by args or sets keyboard backlight to a configured mode.
+// executeCmd invokes the command provided by args or sets keyboard backlight to a configured mode.
 // output, errOut provide corresponding output and error streams.
 // v specifies viper to use. find function is used to look up a supported ite8291 device.
 // readConfig function is used to retrieve configuration either from configuration file provided
 // by corresponding flag or from default global and/or user configuration files.
-func ExecuteCmd(args []string, output, errOut io.Writer,
+func executeCmd(args []string, output, errOut io.Writer,
 	find findDevice, readConf readConfig) (err error) {
 
 	cobra.EnableTraverseRunHooks = true
@@ -82,7 +81,7 @@ func ExecuteCmd(args []string, output, errOut io.Writer,
 		defaultMode := params.DefaultMode(v) // configured default mode
 		if len(defaultMode) > 0 {
 			// insert default mode command
-			args = slices.Insert(args, 0, fmt.Sprintf("%s-mode", defaultMode))
+			args = slices.Insert(args, 0, defaultMode+"-mode")
 		}
 	}
 
@@ -112,6 +111,8 @@ type findDevice func(useDevice bool, bus, address int,
 // timeout specifies maximum duration to wait till a supported device can be found.
 // If timeout is 0 or negative, it doesn't wait and return the corresponding error immediately.
 // pollInterval specifies duration to wait between consequent search attempts.
+//
+//nolint:allireturn
 func findIteDevice(useDevice bool, bus, address int,
 	pollInterval, pollTimeout time.Duration) (dev ite8291.Device, err error) {
 
@@ -124,7 +125,7 @@ func findIteDevice(useDevice bool, bus, address int,
 }
 
 // resetColors resets predefined colors to their configured/default values
-// if reset is set to true and cmd supports reset flag
+// if reset is set to true and cmd supports reset flag.
 func resetColors(ctl *ite8291.Controller, v *viper.Viper, cmd *cobra.Command) (err error) {
 
 	if cmd.Flag(params.ResetProp) == nil || !params.Reset(v) {
@@ -147,6 +148,8 @@ func resetColors(ctl *ite8291.Controller, v *viper.Viper, cmd *cobra.Command) (e
 // v is a viper instance used by commands instead of static one.
 // find is a findDevice function used to obtain ite8291r3 device instance.
 // readConf is a function used to retrieve viper configuration.
+//
+//nolint:funlen
 func newRootCmd(v *viper.Viper, find findDevice) *cobra.Command {
 
 	var rootCmd = &cobra.Command{
@@ -203,10 +206,10 @@ func newRootCmd(v *viper.Viper, find findDevice) *cobra.Command {
 	rootCmd.AddCommand(newRippleModeCmd(v, exec))
 	rootCmd.AddCommand(newSingleColorModeCmd(v, exec))
 	rootCmd.AddCommand(newWaveModeCmd(v, exec))
-	rootCmd.AddCommand(newBrightnessCmd(v, exec))
+	rootCmd.AddCommand(newBrightnessCmd(exec))
 	rootCmd.AddCommand(newSetBrightnessCmd(v, exec))
-	rootCmd.AddCommand(newFirmwareVersionCmd(v, exec))
-	rootCmd.AddCommand(newStateCmd(v, exec))
+	rootCmd.AddCommand(newFirmwareVersionCmd(exec))
+	rootCmd.AddCommand(newStateCmd(exec))
 	rootCmd.AddCommand(newSetColorCmd(v, exec))
 
 	return rootCmd

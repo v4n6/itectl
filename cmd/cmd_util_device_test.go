@@ -76,7 +76,7 @@ func (d *deviceStubT) ControlTransfer(requestType byte, request byte, value uint
 	return len(data), nil
 }
 
-// GetBulkWrite intercepts controller GetBulkWrite calls
+// GetBulkWrite intercepts controller GetBulkWrite calls.
 func (d *deviceStubT) GetBulkWrite() (ite8291.WriteFunc, error) {
 	d.getBulkWriteCallNum++ // increase call counter
 	// init bulk buffer if it doesn't exist
@@ -102,7 +102,7 @@ func (d *deviceStubT) GetBulkWrite() (ite8291.WriteFunc, error) {
 	}, nil
 }
 
-// Close intercepts controller Close calls
+// Close intercepts controller Close calls.
 func (d *deviceStubT) Close() error {
 	// collect other methods call counters
 	d.closePreCtlCallNum = d.ctlCallNum
@@ -128,7 +128,8 @@ type findDeviceCallT struct {
 }
 
 // newFindDevice function used to return given dev controller stub as controller to collect and assert findDevice calls.
-func newFindDevice(dev *deviceStubT, call *findDeviceCallT) func(bool, int, int, time.Duration, time.Duration) (ite8291.Device, error) {
+func newFindDevice(dev *deviceStubT, call *findDeviceCallT) func(bool, int, int,
+	time.Duration, time.Duration) (ite8291.Device, error) {
 	return func(useDevice bool, devBus, devAddress int, pollInterval, pollTimeout time.Duration) (ite8291.Device, error) {
 
 		call.callNum++
