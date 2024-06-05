@@ -1,0 +1,36 @@
+linters:
+  disable:
+    - depguard
+    - testpackage
+    - gci
+    - gochecknoglobals
+    - varnamelen
+    - dupl
+    - errname
+    - exhaustruct
+    - gochecknoinits
+    - whitespace
+    - paralleltest
+    - wsl
+    - gofumpt
+    - nonamedreturns
+    - wrapcheck
+    - nlreturn
+    - gofmt
+    - makezero
+    - gomnd
+    - mnd
+    - ireturn
+    - execinquery
+    - forbidigo
+    - godox
+
+  enable-all: true
+linters-settings:
+  gosec:
+    excludes:
+      - G404
+  revive:
+    rules:
+      - disabled: true
+        name: error-naming
