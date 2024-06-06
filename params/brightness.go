@@ -8,19 +8,20 @@ import (
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
-// BrightnessDefault default brightness value.
+// BrightnessDefault - default value of brightness property.
 const BrightnessDefault = 25
 
+// brightness property and flags names.
 const (
-	// BrightnessProp is name of brightness flag and config property.
+	// BrightnessProp - name of brightness flag and configuration property.
 	BrightnessProp = "brightness"
-	// BrightnessShortFlag is name of brightness short flag.
+	// BrightnessShortFlag - name of brightness short flag.
 	BrightnessShortFlag = "b"
 )
 
-// AddBrightness adds brightness flag to the provided cmd.
-// It also adds hook to bind the flag to the corresponding viper config property
-// and to validate its value.
+// AddBrightness adds brightness flag to the provided cmd. It also
+// adds hook to bind the flag to the corresponding viper config
+// property and to validate its value.
 func AddBrightness(cmd *cobra.Command, v *viper.Viper) {
 
 	cmd.PersistentFlags().Uint8P(BrightnessProp, BrightnessShortFlag, BrightnessDefault,

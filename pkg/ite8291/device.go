@@ -8,31 +8,33 @@ import (
 	"github.com/gotmc/libusb/v2"
 )
 
-// ite8291r3 request type
+// ite8291r3 request types.
 const (
 	SendControlRequestType    = byte(libusb.HostToDevice) | byte(libusb.Class) | byte(libusb.InterfaceRecipient)
 	ReceiveControlRequestType = byte(libusb.DeviceToHost) | byte(libusb.Class) | byte(libusb.InterfaceRecipient)
 )
 
-// vendorID - vendor id of ite8291r3 usb device
+// vendorID - vendor id of ite8291r3 usb device.
 const vendorID = 0x048D
 
-// endpointOutDirection - out endpoint direction
+// endpointOutDirection - out endpoint direction.
 const endpointOutDirection libusb.EndpointDirection = 0
 
-// productIDs - supported product ids of ite8291r3 devices
+// productIDs - supported product ids of ite8291r3 devices.
 var productIDs = map[uint16]bool{0x6004: true, 0x6006: true, 0xCE00: true}
 
-// ErrNoDevFound - error indicating that no ite8291r3 device found
+// ErrNoDevFound error indicates that no ite8291r3 device found.
 var ErrNoDevFound = errors.New("no ite8291r3 device found")
 
-// ErrUnsupportedDev - error indicating that a device with given bus and address is not an ite8291r3 device
+// ErrUnsupportedDev error indicates that a device with the given bus
+// and address is not an ite8291r3 device.
 var ErrUnsupportedDev = errors.New("is not ite8291 device")
 
-// ErrNoOutEndpointFound - error indicating that no out endpoint found at ite8291r3 device
+// ErrNoOutEndpointFound error indicates that no out endpoint found at
+// ite8291r3 device.
 var ErrNoOutEndpointFound = errors.New("no output endpoint found")
 
-// USBDevice type provides ite8291r3 usb device
+// USBDevice type provides ite8291r3 usb device.
 type USBDevice struct {
 	*libusb.DeviceHandle
 
@@ -40,7 +42,7 @@ type USBDevice struct {
 	dev *libusb.Device
 }
 
-// Close USBDevice. It closes underlying libusb.Contexst and libusb.DeviceHandle.
+// Close closes underlying libusb.Context and libusb.DeviceHandle.
 func (d *USBDevice) Close() error {
 
 	err := d.DeviceHandle.Close()
@@ -52,11 +54,13 @@ func (d *USBDevice) Close() error {
 	return err
 }
 
-// WriteFunc type provides function intended to write bulk data to a USB device.
+// WriteFunc type provides function intended to write bulk data to USB
+// device.
 type WriteFunc func(p []byte) (n int, err error)
 
-// GetBulkWrite returns WriteFunc intended to write bulk data to the ite8291r3 device.
-// It is used to set color(s) of all/specific key(s) of keyboard backlight.
+// GetBulkWrite returns WriteFunc intended to write bulk data to the
+// ite8291r3 device. It is used to set color(s) of all/specific key(s)
+// of keyboard backlight.
 func (d *USBDevice) GetBulkWrite() (WriteFunc, error) {
 
 	cfg, err := d.dev.ActiveConfigDescriptor()
@@ -81,12 +85,12 @@ func (d *USBDevice) GetBulkWrite() (WriteFunc, error) {
 	return nil, fmt.Errorf("%w", ErrNoOutEndpointFound)
 }
 
-// CheckDevice type provides function to check wether a given dev
-// is a supported ite8291r3 device.
+// CheckDevice type provides function to check wether a given dev is a
+// supported ite8291r3 device.
 type CheckDevice func(dev *libusb.Device) (ok bool, err error)
 
-// CheckDeviceByVendorProduct checks wether vendor and product ids
-// of given dev are that of supported ite8291r3 devices.
+// CheckDeviceByVendorProduct checks wether vendor and product ids of
+// given device are that of supported ite8291r3 devices.
 func CheckDeviceByVendorProduct(dev *libusb.Device) (found bool, err error) {
 	d, err := dev.DeviceDescriptor()
 	if err != nil {
@@ -96,12 +100,12 @@ func CheckDeviceByVendorProduct(dev *libusb.Device) (found bool, err error) {
 	return d.VendorID == vendorID && productIDs[d.ProductID], nil
 }
 
-// NewCheckDeviceByBusAddress returns CheckDevice function
-// that checks wether given dev has specified bus and address,
-// and its vendor and product ids are that of supported ite8291r3 devices.
+// NewCheckDeviceByBusAddress returns CheckDevice function that checks
+// wether given device has specified bus and address, and its vendor
+// and product ids are that of supported ite8291r3 devices.
 //
-// It returns instance of UnsupportedDeviceError if a device with
-// correct bus and address is not a supported ite8291r3 device.
+// It returns instance of ErrUnsupportedDev if a device with correct
+// bus and address is not a supported ite8291r3 device.
 func NewCheckDeviceByBusAddress(bus, address int) CheckDevice {
 	return func(dev *libusb.Device) (bool, error) {
 		b, _ := dev.BusNumber()
@@ -125,13 +129,14 @@ func NewCheckDeviceByBusAddress(bus, address int) CheckDevice {
 	}
 }
 
-// targetInterfaceNumber - interface number of ite8291r3 device to check and detach, if necessary, kernel driver.
+// targetInterfaceNumber - interface number of ite8291r3 device to
+// check and detach kernel driver, if necessary.
 const targetInterfaceNumber = 1
 
-// LookupDevice traverses all usb devices and returns first found supported ite8291r3 device.
-// It uses given check function to decide whether a device is supported.
-// It returns pointer to found usbDevice or occurred error.
-// LookupDevice returns instance of NoDeviceFoundError if no supported device found.
+// LookupDevice traverses all usb devices and returns first found
+// supported ite8291r3 device. It uses given check function to decide
+// whether a device is supported. LookupDevice returns instance of
+// ErrNoDevFound if no supported device was found.
 //
 //nolint:cyclop
 func LookupDevice(ctx *libusb.Context, check CheckDevice) (usbDevice *USBDevice, err error) {
@@ -186,12 +191,14 @@ func LookupDevice(ctx *libusb.Context, check CheckDevice) (usbDevice *USBDevice,
 	return nil, fmt.Errorf("%w", ErrNoDevFound)
 }
 
-// FindDevice searches for a supported ite8291r3 device. check function decides whether a device is a supported one.
-//
-// If no device was found it repeats the search after pollInterval duration. If no device was found in timeout
-// duration, FindDevice returns instance of NoDeviceFoundError. If timeout is 0 or negative no further searches
+// FindDevice searches for a supported ite8291r3 device. check
+// function decides whether a device is a supported one. If no device
+// was found it repeats the search after pollInterval duration. If no
+// device was found in timeout duration, FindDevice returns instance
+// of ErrNoDevFound. If timeout is 0 or negative no further searches
 // are done and the error is returned immediately.
-func FindDevice(pollInterval, timeout time.Duration, check CheckDevice) (usbDevice *USBDevice, err error) {
+func FindDevice(pollInterval, timeout time.Duration,
+	check CheckDevice) (usbDevice *USBDevice, err error) {
 
 	ctx, err := libusb.NewContext()
 	if err != nil {

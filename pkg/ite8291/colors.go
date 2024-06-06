@@ -5,7 +5,8 @@ import (
 	"fmt"
 )
 
-// ErrInvalidColorFormat error signaling invalid format of color text representation.
+// ErrInvalidColorFormat error signals invalid format of color text
+// representation.
 var ErrInvalidColorFormat = errors.New("invalid color format")
 
 // SupportedColorStringFormats provides supported color text formats.
@@ -25,7 +26,7 @@ type Color struct {
 	Blue  uint8
 }
 
-// String - stringer implementation.
+// String outputs color in "#HHHHHH" format.
 func (c *Color) String() string {
 	return fmt.Sprintf("#%02X%02X%02X", c.Red, c.Green, c.Blue)
 }
@@ -40,8 +41,9 @@ func FromRGB(rgb uint32) *Color {
 	return &Color{Red: byte(rgb >> 16 & 0xFF), Green: byte(rgb >> 8 & 0xFF), Blue: byte(rgb & 0xFF)}
 }
 
-// ParseColor parses s to Color.
-// It accepts following formats 0xHHHHHH,#xHHHHHH,#HHHHHH,HHHHHH,#HHH,HHH.
+// ParseColor parses the specified string to Color. It accepts
+// following formats "0xHHHHHH", "#xHHHHHH", "#HHHHHH", "HHHHHH",
+// "#HHH", "HHH".
 //
 //nolint:funlen,cyclop
 func ParseColor(s string) (*Color, error) {
@@ -49,7 +51,9 @@ func ParseColor(s string) (*Color, error) {
 	var i, l = 0, len(s)
 
 	newErr := func() error {
-		return fmt.Errorf("%w: expected one of 0xHHHHHH,#xHHHHHH,#HHHHHH,HHHHHH,#HHH,HHH was %q", ErrInvalidColorFormat, s)
+		return fmt.Errorf(
+			"%w: expected one of 0xHHHHHH,#xHHHHHH,#HHHHHH,HHHHHH,#HHH,HHH was %q",
+			ErrInvalidColorFormat, s)
 	}
 
 	switch l {

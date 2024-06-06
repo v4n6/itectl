@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-// ite8291r3 controller command
+// ite8291r3 controller commands.
 const (
 	GetEffectCommand          = 0x88
 	SetEffectCommand          = 0x8
@@ -14,18 +14,18 @@ const (
 	GetFirmwareVersionCommand = 0x80
 )
 
-// ite8291r3 effect operation
+// ite8291r3 effect operations.
 const (
 	SetEffectOp = 0x2
 	SetOffOp    = 0x1
 )
 
-// ite8291r3 state
+// ite8291r3 states.
 const (
 	OffState = 0x1
 )
 
-// ite8291r3 effect type
+// ite8291r3 effect types.
 const (
 	BreathingEffect = 0x2
 	WaveEffect      = 0x3
@@ -39,10 +39,10 @@ const (
 	UserEffect      = 0x33
 )
 
-// Direction provides type for direction of ite8291r3 effects
+// Direction represents direction of ite8291r3 effects.
 type Direction byte
 
-// ite8291r3 effect direction
+// ite8291r3 effect directions.
 const (
 	DirectionNone  Direction = 0x0
 	DirectionRight Direction = 0x1
@@ -51,7 +51,7 @@ const (
 	DirectionDown  Direction = 0x4
 )
 
-// ite8291r3 controller parameters boundary
+// ite8291r3 controller parameters boundaries.
 const (
 	BrightnessMaxValue = 50
 
@@ -64,19 +64,19 @@ const (
 	CustomColorNumMaxValue = 0x7
 )
 
-// special color number
+// special color numbers.
 const (
 	ColorNone   = 0x0
 	ColorRandom = 0x8
 )
 
-// ite8291r3 keyboard size
+// ite8291r3 keyboard dimension.
 const (
 	RowsNumber    = 6
 	ColumnsNumber = 21
 )
 
-// auxiliary ite8291r3 keyboard buffer constant
+// auxiliary ite8291r3 keyboard buffer constants.
 const (
 	rowBufferLength = 3*ColumnsNumber + 2
 
@@ -87,35 +87,39 @@ const (
 
 // Device interface abstracts ite8291r3 usb device.
 type Device interface {
-	// ControlTransfer method of *libusb.DeviceHandle.
-	// It is used to set effects and their attributes and get and set global ite8291r3 properties.
+
+	// ControlTransfer method of *libusb.DeviceHandle. It is used to set
+	// effects and their attributes and get/set global ite8291r3
+	// properties.
 	ControlTransfer(requestType byte, request byte, value uint16, index uint16, data []byte, length int,
 		timeout int) (int, error)
 
-	// GetBulkWrite returns write function that can be used to set keys colors.
+	// GetBulkWrite returns write function that can be used to set keys
+	// colors.
 	GetBulkWrite() (WriteFunc, error)
 
-	// Close cleans up the device
+	// Close closes the device.
 	Close() error
 }
 
-// Controller provides ite8291r3 controller functionality
+// Controller provides ite8291r3 controller functionality.
 type Controller struct {
 	dev Device
 }
 
-// NewController creates new controller backed by provided ite8291r3 usb device
-func NewController(dev Device) *Controller {
+// NewController creates a new controller backed by provided ite8291r3
+// usb device.
+func NewController(d Device) *Controller {
 
-	return &Controller{dev: dev}
+	return &Controller{dev: d}
 }
 
-// Close cleans up underlying ite8291r3 usb device
+// Close cleans up underlying ite8291r3 usb device.
 func (c *Controller) Close() error {
 	return c.dev.Close()
 }
 
-// ControlSend sends data to ite8291r3 controller
+// ControlSend sends data to ite8291r3 controller.
 func (c *Controller) ControlSend(data []byte) error {
 
 	_, err := c.dev.ControlTransfer(SendControlRequestType,
@@ -129,7 +133,7 @@ func (c *Controller) ControlSend(data []byte) error {
 	return err
 }
 
-// ControlSend receives data from ite8291r3 controller
+// ControlSend receives data from ite8291r3 controller.
 func (c *Controller) controlReceive(data []byte) error {
 	_, err := c.dev.ControlTransfer(ReceiveControlRequestType,
 		0x001, // bRequest (HID set_report)
@@ -142,7 +146,7 @@ func (c *Controller) controlReceive(data []byte) error {
 	return err
 }
 
-// SetEffect sets ite8291r3 effect and its attributes
+// SetEffect sets ite8291r3 effect and its attributes.
 func (c *Controller) SetEffect(cntrl, effect, speed, brightness, colorNum,
 	reactOrDiv byte, save bool) error {
 
@@ -150,18 +154,19 @@ func (c *Controller) SetEffect(cntrl, effect, speed, brightness, colorNum,
 		reactOrDiv, bool2Byte(save)})
 }
 
-// SetEffect sets ite8291r3 reactive effect and its attributes
+// SetEffect sets ite8291r3 reactive effect and its attributes.
 func (c *Controller) setEffectWithReactive(effect, speed, brightness, colorNum byte, reactive, save bool) error {
 	return c.SetEffect(SetEffectOp, effect, speed, brightness, colorNum, bool2Byte(reactive), save)
 }
 
-// SetOffMode switches ite8291r3 keyboard backlight off
+// SetOffMode switches ite8291r3 keyboard backlight off.
 func (c *Controller) SetOffMode() error {
 
 	return c.SetEffect(SetOffOp, 0, 0, 0, 0, 0, false)
 }
 
-// State retrieves ite8291r3 keyboard backlight state: whether it's On (true) or Off (false).
+// State retrieves ite8291r3 keyboard backlight state: whether it's On
+// (true) or Off (false).
 func (c *Controller) State() (state bool, err error) {
 
 	if err := c.ControlSend([]byte{GetEffectCommand}); err != nil {
@@ -176,16 +181,16 @@ func (c *Controller) State() (state bool, err error) {
 	return out[1] != OffState, nil
 }
 
-// SetBrightness sets brightness of ite8291r3 keyboard backlight.
-// The maximum value is specified by BrightnessMaxValue
+// SetBrightness sets brightness of ite8291r3 keyboard backlight. The
+// maximum value is specified by BrightnessMaxValue.
 func (c *Controller) SetBrightness(brightness byte) error {
 
 	return c.ControlSend([]byte{SetBrightnessCommand, SetEffectOp, brightness})
 }
 
-// GetBrightness returns brightness of ite8291r3 keyboard backlight.
-// The maximum value is specified by BrightnessMaxValue
-func (c *Controller) GetBrightness() (brightness byte, err error) {
+// Brightness returns brightness of ite8291r3 keyboard backlight. The
+// maximum value is specified by BrightnessMaxValue.
+func (c *Controller) Brightness() (brightness byte, err error) {
 
 	if err = c.ControlSend([]byte{GetEffectCommand}); err != nil {
 		return 0, err
@@ -199,110 +204,80 @@ func (c *Controller) GetBrightness() (brightness byte, err error) {
 	return out[4], nil
 }
 
-// SetAuroraMode sets ite8291r3 keyboard backlight controller to 'aurora' effect
-func (c *Controller) SetAuroraMode(speed, brightness, colorNum byte, reactive, save bool) error {
+// SetAuroraMode sets ite8291r3 keyboard backlight controller to
+// 'aurora' effect.
+func (c *Controller) SetAuroraMode(speed, brightness, colorNum byte,
+	reactive, save bool) error {
 
-	return c.setEffectWithReactive(AuroraEffect, speed, brightness, colorNum, reactive, save)
+	return c.setEffectWithReactive(AuroraEffect, speed, brightness,
+		colorNum, reactive, save)
 }
 
-// SetBreathingMode sets ite8291r3 keyboard backlight controller to 'breathing' effect
+// SetBreathingMode sets ite8291r3 keyboard backlight controller to
+// 'breathing' effect.
 func (c *Controller) SetBreathingMode(speed, brightness, colorNum byte, save bool) error {
 
 	return c.setEffectWithReactive(BreathingEffect, speed, brightness, colorNum, false, save)
 }
 
-// SetFireworksMode sets ite8291r3 keyboard backlight to 'fireworks' effect.
-// it uses following attributes:
-// brightness of backlight
-// colorNum - number of predefined color
-// whether the effect should be reactive.
-// whether to save effect in the controller
+// SetFireworksMode sets ite8291r3 keyboard backlight to 'fireworks'
+// effect.
 func (c *Controller) SetFireworksMode(speed, brightness, colorNum byte, reactive, save bool) error {
 
 	return c.setEffectWithReactive(FireworksEffect, speed, brightness, colorNum, reactive, save)
 }
 
-// SetMarqueeMode sets ite8291r3 keyboard backlight to 'marquee' effect.
-// it uses following attributes:
-// brightness of backlight
-// whether to save effect in the controller
+// SetMarqueeMode sets ite8291r3 keyboard backlight to 'marquee'
+// effect.
 func (c *Controller) SetMarqueeMode(speed, brightness byte, save bool) error {
 
 	return c.setEffectWithReactive(MarqueeEffect, speed, brightness, 0, false, save)
 }
 
 // SetRainbowMode sets ite8291r3 keyboard backlight to 'rainbow' effect.
-// it uses following attributes:
-// brightness of backlight
-// whether to save effect in the controller
 func (c *Controller) SetRainbowMode(brightness byte, save bool) error {
 
 	return c.setEffectWithReactive(RainbowEffect, 0, brightness, 0, false, save)
 }
 
 // SetRaindropMode sets ite8291r3 keyboard backlight to 'raindrop' effect.
-// it uses following attributes:
-// brightness of backlight
-// colorNum - number of predefined color
-// whether to save effect in the controller
 func (c *Controller) SetRaindropMode(speed, brightness, colorNum byte, save bool) error {
 
 	return c.setEffectWithReactive(RaindropEffect, speed, brightness, colorNum, false, save)
 }
 
 // SetRandomMode sets ite8291r3 keyboard backlight to 'random' effect.
-// it uses following attributes:
-// brightness of backlight
-// colorNum - number of predefined color
-// whether the effect should be reactive.
-// whether to save effect in the controller
 func (c *Controller) SetRandomMode(speed, brightness, colorNum byte, reactive, save bool) error {
 
 	return c.setEffectWithReactive(RandomEffect, speed, brightness, colorNum, reactive, save)
 }
 
 // SetRippleMode sets ite8291r3 keyboard backlight to 'ripple' effect.
-// it uses following attributes:
-// brightness of backlight
-// colorNum - number of predefined color
-// whether the effect should be reactive.
-// whether to save effect in the controller
 func (c *Controller) SetRippleMode(speed, brightness, colorNum byte, reactive, save bool) error {
 
 	return c.setEffectWithReactive(RippleEffect, speed, brightness, colorNum, reactive, save)
 }
 
 // SetWaveMode sets ite8291r3 keyboard backlight to 'wave' effect.
-// it uses following attributes:
-// brightness of backlight
-// direction of the effect
-// whether to save effect in the controller
 func (c *Controller) SetWaveMode(speed, brightness byte, direction Direction, save bool) error {
 
 	return c.SetEffect(SetEffectOp, WaveEffect, speed, brightness, 0, byte(direction), save)
 }
 
 // SetUserMode sets ite8291r3 keyboard backlight to 'user' effect.
-// In this mode it's possible to set color of each key separately
-// via writeFunc provided by device GetBulkWrite method.
-// The method uses following attributes:
-// brightness of backlight
-// whether to save effect in the controller
 func (c *Controller) setUserMode(brightness byte, save bool) error {
 
 	return c.setEffectWithReactive(UserEffect, 0, brightness, 0, false, save)
 }
 
+// setRowIndex sets current keyboard row of 'user' effect to the
+// specified value.
 func (c *Controller) setRowIndex(idx byte) error {
 
 	return c.ControlSend([]byte{SetRowIndexCommand, 0, idx})
 }
 
 // SetSingleColorMode sets color of all keyboard backlight key to the specified color.
-// It uses following attributes:
-// brightness of backlight
-// color to set keys to
-// whether to save effect in the controller
 func (c *Controller) SetSingleColorMode(brightness byte, color *Color, save bool) error {
 
 	if err := c.setUserMode(brightness, save); err != nil {
@@ -334,13 +309,14 @@ func (c *Controller) SetSingleColorMode(brightness byte, color *Color, save bool
 	return nil
 }
 
-// SetColor sets predefined color specified by its colorNum to the given color
+// SetColor sets predefined color specified by its colorNum to the
+// given color.
 func (c *Controller) SetColor(colorNum byte, color *Color) error {
 
 	return c.ControlSend([]byte{SetColorCommand, 0, colorNum, color.Red, color.Green, color.Blue})
 }
 
-// SetColors sets predefined colors to the provided colors
+// SetColors sets predefined colors to the provided colors.
 func (c *Controller) SetColors(colors []*Color) error {
 
 	for i, col := range colors[:CustomColorNumMaxValue-CustomColorNumMinValue+1] {
@@ -353,8 +329,9 @@ func (c *Controller) SetColors(colors []*Color) error {
 	return nil
 }
 
-// GetFirmwareVersion returns firmware version of ite8291r3 controller as string.
-func (c *Controller) GetFirmwareVersion() (string, error) {
+// FirmwareVersion returns firmware version of ite8291r3 controller
+// as string.
+func (c *Controller) FirmwareVersion() (string, error) {
 
 	if err := c.ControlSend([]byte{GetFirmwareVersionCommand}); err != nil {
 		return "", err
@@ -369,6 +346,8 @@ func (c *Controller) GetFirmwareVersion() (string, error) {
 	return fmt.Sprintf("%d.%d.%d.%d", out[1], out[2], out[3], out[4]), nil
 }
 
+// bool2Byte converts provided boolean to byte. False is converted to
+// 0, true to 1.
 func bool2Byte(b bool) byte {
 	if b {
 		return 1

@@ -5,14 +5,14 @@ import (
 	"github.com/spf13/viper"
 )
 
-// ReactiveDefault is reactive property default value.
+// ReactiveDefault - default value of the reactive property.
 const ReactiveDefault = false
 
-// ReactiveProp is name of reactive flag and reactive configuration property.
+// ReactiveProp - name of reactive flag and reactive configuration property.
 const ReactiveProp = "reactive"
 
-// AddReactive adds reactive flag to the provided cmd.
-// It also adds hook to bind it to the corresponding viper config property.
+// AddReactive adds reactive flag to the provided cmd. It also adds
+// hook to bind it to the corresponding viper configuration property.
 func AddReactive(cmd *cobra.Command, v *viper.Viper) {
 	cmd.PersistentFlags().Bool(ReactiveProp, ReactiveDefault,
 		"Make the keyboard backlight effect react to user input. "+

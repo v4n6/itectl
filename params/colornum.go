@@ -8,23 +8,22 @@ import (
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
-const (
-	// ColorNumDefault is color number property default value.
-	ColorNumDefault = ite8291.ColorRandom
-)
+// ColorNumDefault - default value of color number property.
+const ColorNumDefault = ite8291.ColorRandom
 
+// color number property and flags names.
 const (
-	// ColorNumProp is name of color number configuration property.
+	// ColorNumProp - name of color number configuration property.
 	ColorNumProp = "colorNum"
-	// ColorNumFlag is name of color number flag.
+	// ColorNumFlag - name of color number flag.
 	ColorNumFlag = "color-num"
-	// ColorNumFlag is name of color number short flag.
+	// ColorNumFlag - name of color number short flag.
 	ColorNumShortFlag = "c"
 )
 
-// AddColorNum adds color number flag to the provided cmd.
-// It also adds hook to bind it to the corresponding viper config property
-// and to validate its value.
+// AddColorNum adds color number flag to the provided cmd. It also
+// adds hook to bind it to the corresponding viper configuration property and
+// to validate its value.
 func AddColorNum(cmd *cobra.Command, v *viper.Viper) {
 
 	//nolint:lll
@@ -43,9 +42,9 @@ func ColorNum(v *viper.Viper) byte {
 	return byte(v.GetUint(ColorNumProp))
 }
 
-// AddCustomColorNum adds customizable color number flag to the provided cmd.
-// It also adds hook to validate its value.
-// It returns function to retrieve current color number flag value.
+// AddCustomColorNum adds customizable color number flag to the
+// provided cmd. It also adds hook to validate its value. It returns
+// function to retrieve current color number flag value.
 func AddCustomColorNum(cmd *cobra.Command) (assignableColorNum func() byte) {
 
 	var customColorNum byte

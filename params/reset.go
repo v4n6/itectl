@@ -8,18 +8,17 @@ import (
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
-// ResetDefault is a default value of "reset" property.
+// ResetDefault - default value of the reset property.
 const ResetDefault = false
 
-// ResetProp is name of reset flag and configuration property.
+// ResetProp - name of reset flag and configuration property.
 const ResetProp = "reset"
 
-const (
-	// PredefinedColorProp name of predefined colors configuration property.
-	PredefinedColorProp = "predefinedColors"
-	// predefinedColorPropTemplate is template of the name of predefined color property.
-	predefinedColorPropTemplate = "%s.color%d"
-)
+// PredefinedColorProp - name of the predefined colors configuration property.
+const PredefinedColorProp = "predefinedColors"
+
+// predefinedColorPropTemplate - template of the name of predefined color property.
+const predefinedColorPropTemplate = "%s.color%d"
 
 // default values of predefined colors.
 var PredefinedColorsDefault []string = []string{
@@ -32,8 +31,8 @@ var PredefinedColorsDefault []string = []string{
 	"#FF00FF",
 }
 
-// AddReset adds "reset" flag to the provided cmd.
-// It also adds hook to bind it to the corresponding viper config property.
+// AddReset adds reset flag to the provided cmd. It also adds hook to
+// bind it to the corresponding viper configuration property.
 func AddReset(cmd *cobra.Command, v *viper.Viper) {
 
 	cmd.PersistentFlags().Bool(ResetProp, ResetDefault,
@@ -42,7 +41,7 @@ func AddReset(cmd *cobra.Command, v *viper.Viper) {
 	bindAndValidate(cmd, v, ResetProp, ResetProp, nil)
 }
 
-// Reset returns value of reset property.
+// Reset returns reset property value.
 func Reset(v *viper.Viper) bool {
 	return v.GetBool(ResetProp)
 }

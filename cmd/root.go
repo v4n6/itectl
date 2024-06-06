@@ -1,24 +1,3 @@
-/*
-Copyright © 2024 Sergey Morozov
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-*/
 package cmd
 
 import (
@@ -33,7 +12,7 @@ import (
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
-// Execute invokes the application.
+// Execute runs the application.
 func Execute() {
 
 	cobra.CheckErr(
@@ -42,7 +21,7 @@ func Execute() {
 
 // executeCmd invokes the command provided by args or sets keyboard backlight to a configured mode.
 // output, errOut provide corresponding output and error streams.
-// v specifies viper to use. find function is used to look up a supported ite8291 device.
+// find function is used to look up a supported ite8291 device.
 // readConfig function is used to retrieve configuration either from configuration file provided
 // by corresponding flag or from default global and/or user configuration files.
 func executeCmd(args []string, output, errOut io.Writer,
@@ -91,28 +70,33 @@ func executeCmd(args []string, output, errOut io.Writer,
 	return rootCmd.Execute()
 }
 
-// readConfig type provides a function to retrieve and merge viper configuration.
+// readConfig type provides a function to retrieve and merge viper
+// configuration.
 type readConfig func(cmd *cobra.Command, v *viper.Viper, cfgFile string) error
 
-// ite8291Call type provides a function that calls a sub command method on provided controller.
+// ite8291Call type provides a function that calls a sub command
+// method on provided controller.
 type ite8291Call func(ctl *ite8291.Controller) error
 
-// ite8291Ctl type defines a function that provides ite8291r3 controller and calls given f with it.
+// ite8291Ctl type defines a function that provides ite8291r3
+// controller and calls given f with it.
 type ite8291Ctl func(cmd *cobra.Command, f ite8291Call) error
 
-// findDevice type provides a function that looks up a supported ite8291r3 device based on the given parameters.
-// It returns pointer to found device or occurred error.
+// findDevice type provides a function that looks up a supported
+// ite8291r3 device based on the given parameters.  It returns pointer
+// to found device or occurred error.
 type findDevice func(useDevice bool, bus, address int,
 	pollInterval, timeout time.Duration) (dev ite8291.Device, err error)
 
 // findIteDevice looks up a supported ite8291r3 device.
 //
-// useDevice specifies whether an ite8291r3 device identified by bus and address must be used.
-// timeout specifies maximum duration to wait till a supported device can be found.
-// If timeout is 0 or negative, it doesn't wait and return the corresponding error immediately.
-// pollInterval specifies duration to wait between consequent search attempts.
-//
-//nolint:allireturn
+// useDevice specifies whether an ite8291r3 device identified by bus
+// and address must be used.
+// timeout specifies maximum duration to wait till a supported device
+// can be found.  If timeout is 0 or negative, it doesn't wait and
+// return the corresponding error immediately.
+// pollInterval specifies duration to wait between consequent device search
+// attempts.
 func findIteDevice(useDevice bool, bus, address int,
 	pollInterval, pollTimeout time.Duration) (dev ite8291.Device, err error) {
 
@@ -124,8 +108,8 @@ func findIteDevice(useDevice bool, bus, address int,
 	return ite8291.FindDevice(pollInterval, pollTimeout, devChecker)
 }
 
-// resetColors resets predefined colors to their configured/default values
-// if reset is set to true and cmd supports reset flag.
+// resetColors resets predefined colors to their configured/default
+// values if reset is set to true and cmd supports reset flag.
 func resetColors(ctl *ite8291.Controller, v *viper.Viper, cmd *cobra.Command) (err error) {
 
 	if cmd.Flag(params.ResetProp) == nil || !params.Reset(v) {
@@ -145,9 +129,9 @@ func resetColors(ctl *ite8291.Controller, v *viper.Viper, cmd *cobra.Command) (e
 }
 
 // newRootCmd creates, initializes and returns root command.
-// v is a viper instance used by commands instead of static one.
-// find is a findDevice function used to obtain ite8291r3 device instance.
-// readConf is a function used to retrieve viper configuration.
+// v is a viper instance used by commands instead of the static one.
+// find is a findDevice function used to obtain ite8291r3 device
+// instance.
 //
 //nolint:funlen
 func newRootCmd(v *viper.Viper, find findDevice) *cobra.Command {

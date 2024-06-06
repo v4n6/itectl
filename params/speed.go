@@ -8,19 +8,20 @@ import (
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
-// SpeedDefault is default speed value.
+// SpeedDefault - default value of the speed property.
 const SpeedDefault = 5
 
+// speed property and flags names.
 const (
-	// SpeedProp is name of speed flag and config property.
+	// SpeedProp - name of speed flag and configuration property.
 	SpeedProp = "speed"
-	// SpeedShortFlag is name of speed short flag.
+	// SpeedShortFlag - name of speed short flag.
 	SpeedShortFlag = "s"
 )
 
-// AddSpeed adds speed flag to the provided cmd.
-// It also adds hook to bind it to the corresponding viper configuration property
-// and to validate its value.
+// AddSpeed adds speed flag to the provided cmd. It also adds hook to
+// bind it to the corresponding viper configuration property and to
+// validate its value.
 func AddSpeed(cmd *cobra.Command, v *viper.Viper) {
 
 	cmd.PersistentFlags().Uint8P(SpeedProp, SpeedShortFlag, SpeedDefault,

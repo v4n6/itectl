@@ -9,13 +9,14 @@ import (
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
-// DirectionDefault is default value of direction configuration property.
+// DirectionDefault - default value of direction property.
 const DirectionDefault string = "right"
 
+// direction property and flags names.
 const (
-	// DirectionProp is name of direction flag and configuration property.
+	// DirectionProp - name of direction flag and configuration property.
 	DirectionProp = "direction"
-	// DirectionShortFlag is name of direction short flag.
+	// DirectionShortFlag - name of direction short flag.
 	DirectionShortFlag = "d"
 )
 
@@ -29,10 +30,9 @@ var directions = map[string]ite8291.Direction{
 
 var directionNames = []string{"none", "right", "left", "up", "down"}
 
-// ParseDirectionName parses given direction name
-// to the corresponding ite8291.Direction value.
-// It reports InvalidOptionValueError if direction name is not a valid name.
-// Direction name is case insensitive.
+// ParseDirectionName parses given direction name to the corresponding
+// ite8291.Direction value. It reports ErrInvalidOptVal if direction
+// name is not a valid direction. Direction names are case insensitive.
 func ParseDirectionName(name string) (ite8291.Direction, error) {
 
 	if dir, found := directions[strings.ToLower(name)]; found {
@@ -43,10 +43,10 @@ func ParseDirectionName(name string) (ite8291.Direction, error) {
 		fmt.Sprintf("-%s, --%s", DirectionShortFlag, DirectionProp), directionNames)
 }
 
-// AddDirection adds direction flag to the provided cmd.
-// It also adds hook to bind the flag to the corresponding viper config property
-// and to validate the direction value.
-// AddDirection returns function to retrieve current direction value.
+// AddDirection adds direction flag to the provided cmd. It also adds
+// hook to bind the flag to the corresponding viper configuration property
+// and to validate the direction value. AddDirection returns function
+// to retrieve current direction value.
 func AddDirection(cmd *cobra.Command, v *viper.Viper) (direction func() ite8291.Direction) {
 
 	var dir ite8291.Direction

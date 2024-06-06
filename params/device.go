@@ -7,27 +7,30 @@ import (
 	"github.com/spf13/viper"
 )
 
+// device related properties default values.
 const (
-	// DeviceBusDefault is default value of device usb bus.
+	// DeviceBusDefault - default value of device usb bus.
 	DeviceBusDefault = 0
-	// deviceBusDefault is default value of device usb address.
+	// deviceBusDefault - default value of device usb address.
 	DeviceAddressDefault = 0
 )
 
+// device related properties and flags names.
 const (
-	// deviceBusProp is name of the device bus configuration property.
+	// deviceBusProp - name of the device bus configuration property.
 	deviceBusProp = "device.bus"
-	// DeviceBusFlag is name of the device bus flag.
+	// DeviceBusFlag - name of the device bus flag.
 	DeviceBusFlag = "device-bus"
 
-	// deviceAddressProp is name of the device address configuration property.
+	// deviceAddressProp - name of the device address configuration property.
 	deviceAddressProp = "device.address"
-	// DeviceAddressFlag is name of the device address flag.
+	// DeviceAddressFlag - name of the device address flag.
 	DeviceAddressFlag = "device-address"
 )
 
-// AddDevice adds device related flags to the provided cmd.
-// It also adds hook to bind them to the corresponding viper config properties.
+// AddDevice adds device related flags to the provided cmd. It also
+// adds hook to bind them to the corresponding viper config
+// properties.
 func AddDevice(cmd *cobra.Command, v *viper.Viper) {
 
 	cmd.PersistentFlags().Uint(DeviceBusFlag, DeviceBusDefault,
@@ -39,15 +42,11 @@ func AddDevice(cmd *cobra.Command, v *viper.Viper) {
 	bindAndValidate(cmd, v, DeviceAddressFlag, deviceAddressProp, nil)
 }
 
-// Device returns device related property values:
-//
-// useDevice - whether a specific device identified by device bus and
-// number should be used
-//
-// deviceBus, deviceAddress - device bus and number properties respectively.
-//
-// It also validates device bus and number. It ensures that either
-// both are positive, or non-positive.
+// Device returns device related property values: useDevice - whether
+// a specific device identified by device bus and number should be
+// used; deviceBus, deviceAddress - device bus and number properties
+// respectively. It also validates device bus and number. It ensures
+// that either both are positive, or non-positive.
 func Device(v *viper.Viper) (useDevice bool,
 	deviceBus, deviceAddress int, err error) {
 

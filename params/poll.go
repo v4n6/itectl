@@ -8,27 +8,30 @@ import (
 	"github.com/spf13/viper"
 )
 
+// polling properties default values.
 const (
-	// PollIntervalDefault is poll interval property default value.
+	// PollIntervalDefault - poll interval property default value.
 	PollIntervalDefault = 200 * time.Millisecond
-	// PollTimeoutDefault is poll timeout property default value.
+	// PollTimeoutDefault - poll timeout property default value.
 	PollTimeoutDefault = 0
 )
 
+// polling properties and flags names.
 const (
-	// pollIntervalProp is name poll interval configuration property.
+	// pollIntervalProp - name of poll interval configuration property.
 	pollIntervalProp = "poll.interval"
-	// PollIntervalFlag is name poll interval flag.
+	// PollIntervalFlag - name of poll interval flag.
 	PollIntervalFlag = "poll-interval"
 
-	// pollTimeoutProp is name poll timeout configuration property.
+	// pollTimeoutProp - name of poll timeout configuration property.
 	pollTimeoutProp = "poll.timeout"
-	// PollTimeoutFlag is name poll timeout flag.
+	// PollTimeoutFlag - name of poll timeout flag.
 	PollTimeoutFlag = "poll-timeout"
 )
 
-// AddPoll adds polling related flags to the provided cmd.
-// It also adds hook to bind them to the corresponding viper config properties.
+// AddPoll adds polling related flags to the provided cmd. It also
+// adds hook to bind them to the corresponding viper config
+// properties.
 func AddPoll(cmd *cobra.Command, v *viper.Viper) {
 
 	cmd.PersistentFlags().Duration(PollIntervalFlag, PollIntervalDefault,
@@ -43,9 +46,9 @@ func AddPoll(cmd *cobra.Command, v *viper.Viper) {
 	bindAndValidate(cmd, v, PollTimeoutFlag, pollTimeoutProp, nil)
 }
 
-// Polls returns polling interval and timeout property values.
-// It also ensures that poll interval is a positive duration
-// less than the timeout, if timeout is not 0.
+// Polls returns polling interval and timeout property values. It also
+// ensures that poll interval is a positive duration less than the
+// timeout, if timeout is not 0.
 func Polls(v *viper.Viper) (pollInterval, pollTimeout time.Duration, err error) {
 
 	interval, timeout := v.GetDuration(pollIntervalProp), v.GetDuration(pollTimeoutProp)

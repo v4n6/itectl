@@ -8,41 +8,43 @@ import (
 	"github.com/v4n6/itectl/pkg/ite8291"
 )
 
+// red, green, blue properties default values.
 const (
-	// RedDefault is default value of red flag.
+	// RedDefault - default value of red flag.
 	RedDefault = 0
-	// GreenDefault is default value of green flag.
+	// GreenDefault - default value of green flag.
 	GreenDefault = 0
-	// BlueDefault is default value of blue flag.
+	// BlueDefault - default value of blue flag.
 	BlueDefault = 0
-
-	// SingleColorDefault is default value of single color configuration property.
-	SingleColorDefault = "#FFFFFF"
 )
 
+// SingleColorDefault - default value of single color property.
+const SingleColorDefault = "#FFFFFF"
+
+// color properties and flags names.
 const (
-	// ColorRedFlag is name of the red color flag.
+	// ColorRedFlag - name of the red color flag.
 	ColorRedFlag = "red"
-	// ColorGreenFlag is name of the green color flag.
+	// ColorGreenFlag - name of the green color flag.
 	ColorGreenFlag = "green"
-	// ColorBlueFlag is name of the blue color flag.
+	// ColorBlueFlag - name of the blue color flag.
 	ColorBlueFlag = "blue"
 
-	// ColorNameFlag is name of the color name flag.
+	// ColorNameFlag - name of the color name flag.
 	ColorNameFlag = "color-name"
-	// ColorRGBFlag is name of the RGB flag.
+	// ColorRGBFlag - name of the RGB flag.
 	ColorRGBFlag = "rgb"
 
-	// SingleColorProp is name of the single color configuration property.
+	// SingleColorProp - name of the single color configuration property.
 	SingleColorProp = "singleModeColor"
 
-	// NamedColorsProp is name of the named colors configuration property.
+	// NamedColorsProp - name of the named colors configuration property.
 	NamedColorsProp = "namedColors"
 )
 
-// colorNameToColor converts given color name to the corresponding instance of ite8291.Color.
-// It returns InvalidOptionValueError if color name was not configured or
-// its value is not a valid color.
+// colorNameToColor converts given color name to the corresponding
+// instance of ite8291.Color. It returns ErrInvalidOptVal if color
+// name was not configured or its value is not a valid color.
 func colorNameToColor(name string, v *viper.Viper) (color *ite8291.Color, err error) {
 
 	if val := v.GetString(fmt.Sprintf("%s.%s", NamedColorsProp, name)); len(val) > 0 {
@@ -60,10 +62,11 @@ func colorNameToColor(name string, v *viper.Viper) (color *ite8291.Color, err er
 		"--"+ColorNameFlag)
 }
 
-// addColorFlags adds color related flags to the provided cmd.
-// It also adds hook to validate their values.
-// The 'required' parameter specifies whether color must be specified explicitly.
-// addColorFlags returns functions to retrieve current red, grenn, blue flags and target color values.
+// addColorFlags adds color related flags to the provided cmd. It also
+// adds hook to validate their values. The 'required' parameter
+// specifies whether color must be specified explicitly.
+// addColorFlags returns pointers to red, green, blue and target color
+// values.
 func addColorFlags(cmd *cobra.Command, v *viper.Viper, required bool) (red, green, blue *byte, color **ite8291.Color) {
 
 	var r, g, b byte
@@ -114,9 +117,10 @@ func addColorFlags(cmd *cobra.Command, v *viper.Viper, required bool) (red, gree
 	return &r, &g, &b, &col
 }
 
-// AddColor adds color related flags to the provided cmd.
-// It also adds hook to validate their values. It ensures that the color is specified explicitly via flags.
-// AddColor returns function to retrieve current color value.
+// AddColor adds color related flags to the provided cmd. It also adds
+// hook to validate their values. It ensures that the color is
+// specified explicitly via flags. AddColor returns function to
+// retrieve current color value.
 func AddColor(cmd *cobra.Command, v *viper.Viper) (color func() *ite8291.Color) {
 
 	r, g, b, col := addColorFlags(cmd, v, true)
@@ -131,10 +135,11 @@ func AddColor(cmd *cobra.Command, v *viper.Viper) (color func() *ite8291.Color) 
 	return func() *ite8291.Color { return *col }
 }
 
-// AddSingleModeColor adds color related flags to the provided 'single-color-mode' cmd.
-// It also adds hook to validate their values. It uses either configured or default value
-// if color is not specified explicitly.
-// AddSingleModeColor returns function to retrieve current value of color for single-color-mode.
+// AddSingleModeColor adds color related flags to the provided
+// 'single-color-mode' cmd.  It also adds hook to validate their
+// values. It uses either configured or default value if color is not
+// specified explicitly.  AddSingleModeColor returns function to
+// retrieve current value of color for single-color mode.
 func AddSingleModeColor(cmd *cobra.Command, v *viper.Viper) (color func() *ite8291.Color) {
 
 	r, g, b, col := addColorFlags(cmd, v, false)
