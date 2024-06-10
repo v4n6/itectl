@@ -155,25 +155,22 @@ test-pattern`, `ite8291r3-ctl freeze`, `ite8291r3-ctl palette
 
 ## Installation
 
-**This project does not contain the ITE 8291r3 driver and requires it
-to be installed (e.g., from
-[tuxedo-drivers](https://github.com/tuxedocomputers/tuxedo-drivers))
-to work properly.**
-
 ### Installation from AUR repository (for arch systems only)
 
-You can install `itectl` using the dedicated
-[itectl-aur](https://github.com/v4n6/itectl-aur) AUR repository. To do
-this, you need to clone the repository and install the package using
-`makepkg`. For example
+You can install `itectl` from [AUR
+repository](https://aur.archlinux.org/packages/itectl) using your favorite aur helper.
+For example
 
 ```
-git clone https://github.com/v4n6/itectl-aur
-cd ./itectl-aur
-makepkg -fi
+yay -S itectl
 ```
 
 ### Manual installation
+
+**Note:** _This project does not contain the ITE 8291r3 driver and
+requires it to be installed (e.g., from
+[tuxedo-drivers](https://github.com/tuxedocomputers/tuxedo-drivers))
+to work properly._
 
 You can test the project using the `go` tool
 
