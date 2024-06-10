@@ -1,4 +1,4 @@
-# itectl - yet another tool to manage ITE 8291r3 keyboard backlight
+# itectl - yet another tool to manage ITE 8291 (rev 0.0.3) keyboard backlight
 
 ## Description
 
